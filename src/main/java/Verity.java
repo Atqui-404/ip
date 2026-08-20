@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 public class Verity {
     private static final String DIVIDER = "----------------------------------------------------";
 
@@ -14,6 +16,17 @@ public class Verity {
         System.out.println("Hello! I'm Verity");
         System.out.println("Ask me anything! I know everything!");
         System.out.println(DIVIDER);
+
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+        System.out.println(DIVIDER);
+
+        while (!input.toLowerCase().equals("bye")) {
+            System.out.println(input);
+            System.out.println(DIVIDER);
+            input = scanner.nextLine();
+            System.out.println(DIVIDER);
+        }
 
         System.out.println("Bye! See you soon!");
         System.out.println(DIVIDER);
