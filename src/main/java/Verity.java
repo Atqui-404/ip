@@ -10,6 +10,11 @@ public class Verity {
             + "   \\_/   \\___||_|   |_| \\__| \\__, |\n"
             + "                             |___/ \n";
 
+    // Fixed-size storage for tasks, as allowed by the Level-2 requirements
+    // (assume no more than 100 tasks, no need to persist to disk yet).
+    private static final String[] tasks = new String[100];
+    private static int taskCount = 0;
+
     public static void main(String[] args) {
         System.out.println(DIVIDER);
         System.out.println(BANNER);
@@ -19,12 +24,30 @@ public class Verity {
 
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
+        String command = input.toLowerCase();
         System.out.println(DIVIDER);
 
-        while (!input.toLowerCase().equals("bye")) {
-            System.out.println(input);
+        while (!command.equals("bye")) {
+            if (command.equals("list")) {
+                if (taskCount > 0) {
+                    // Print total number of tasks
+                    System.out.printf("You have %d tasks!\n", taskCount);
+                    // Print all stored tasks, numbered from 1.
+                    for (int i = 0; i < taskCount; i++) {
+                        System.out.println((i + 1) + ". " + tasks[i]);
+                    }
+                } else { // No tasks
+                    System.out.println("You have no tasks!");
+                }
+            } else {
+                // Anything that isn't "list" or "bye" is treated as a new task to store.
+                tasks[taskCount] = input;
+                taskCount++;
+                System.out.println("added: " + input);
+            }
             System.out.println(DIVIDER);
             input = scanner.nextLine();
+            command = input.toLowerCase();
             System.out.println(DIVIDER);
         }
 
