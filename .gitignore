@@ -16,5 +16,8 @@ bin/
 # Temp files
 _temp/
 
+# Local-only Claude Code skills
+.claude/skills/present-changes-visually/
+
 /text-ui-test/ACTUAL.TXT
 text-ui-test/EXPECTED-UNIX.TXT
