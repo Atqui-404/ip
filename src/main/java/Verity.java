@@ -12,8 +12,7 @@ public class Verity {
 
     // Fixed-size storage for tasks, as allowed by the Level-2 requirements
     // (assume no more than 100 tasks, no need to persist to disk yet).
-    private static final String[] tasks = new String[100];
-    private static final boolean[] isDone = new boolean[100];
+    private static final Task[] tasks = new Task[100];
     private static int taskCount = 0;
 
     public static void main(String[] args) {
@@ -39,37 +38,45 @@ public class Verity {
                     System.out.printf("You have %d tasks!\n", taskCount);
                     // Print all stored tasks, numbered from 1.
                     for (int i = 0; i < taskCount; i++) {
-                        String icon = isDone[i] ? "X" : " "; // X if done, else empty space
-                        System.out.println((i + 1) + ".[" + icon + "] " + tasks[i]);
+                        System.out.println((i + 1) + ".[" + tasks[i].getStatusIcon()
+                                + "] " + tasks[i].getDescription());
                     }
                 } else { // No tasks
                     System.out.println("You have no tasks!");
                 }
-            } else if (command.startsWith("unmark ")) {
-                int index = Integer.parseInt(input.substring(7).trim()) - 1;
+            } else if (command.startsWith("unmark")) {
+                try {
+                    int index = Integer.parseInt(input.substring(7).trim()) - 1;
 
-                if (index >= 0 && index < taskCount) {
-                    isDone[index] = false;
-                    System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  [ ] " + tasks[index]);
-                } else { // Index not in range of existing tasks
+                    if (index >= 0 && index < taskCount) {
+                        tasks[index].markAsNotDone();
+                        System.out.println("OK, I've marked this task as not done yet:");
+                        System.out.println("  [ ] " + tasks[index].getDescription());
+                    } else { // Index not in range of existing tasks
+                        System.out.println("ERROR: Please input a valid index to unmark as done");
+                    }
+                } catch (NumberFormatException e) { // Index not a number
                     System.out.println("ERROR: Please input an index to unmark as done");
                 }
 
-            } else if (command.startsWith("mark ")) {
-                // "mark 2" -> index 1 (0-based) into the tasks/isDone arrays.
-                int index = Integer.parseInt(input.substring(5).trim()) - 1;
+            } else if (command.startsWith("mark")) {
+                try {
+                    // "mark 2" -> index 1 (0-based) into the tasks array.
+                    int index = Integer.parseInt(input.substring(5).trim()) - 1;
 
-                if (index >= 0 && index < taskCount) {
-                    isDone[index] = true;
-                    System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("  [X] " + tasks[index]);
-                } else { // Index not in range of existing tasks
+                    if (index >= 0 && index < taskCount) {
+                        tasks[index].markAsDone();
+                        System.out.println("Nice! I've marked this task as done:");
+                        System.out.println("  [X] " + tasks[index].getDescription());
+                    } else { // Index not in range of existing tasks
+                        System.out.println("ERROR: Please input a valid index to mark as done");
+                    }
+                } catch (NumberFormatException e) { // Index not a number or out of range
                     System.out.println("ERROR: Please input an index to mark as done");
                 }
             } else {
                 // Anything that isn't "list" or "bye" is treated as a new task to store.
-                tasks[taskCount] = input;
+                tasks[taskCount] = new Task(input);
                 taskCount++;
                 System.out.println("added: " + input);
             }
