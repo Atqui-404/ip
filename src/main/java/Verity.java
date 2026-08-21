@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Verity {
@@ -10,10 +11,9 @@ public class Verity {
             + "   \\_/   \\___||_|   |_| \\__| \\__, |\n"
             + "                             |___/ \n";
 
-    // Fixed-size storage for tasks, as allowed by the Level-2 requirements
-    // (assume no more than 100 tasks, no need to persist to disk yet).
-    private static final Task[] tasks = new Task[100];
-    private static int taskCount = 0;
+    // A-Collections: dynamically-sized storage for tasks, so there's no
+    // fixed capacity to run out of (no need to persist to disk yet).
+    private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         System.out.println(DIVIDER);
@@ -30,30 +30,36 @@ public class Verity {
         while (!command.equals("bye")) {
             try {
                 /*
-                Lists out all the tasks from 1 to taskCount if tasks exists;
+                Lists out all the tasks, numbered from 1, if any exist;
                 Otherwise, print "You have no tasks!" if no tasks.
                  */
                 if (command.equals("list")) {
-                    if (taskCount > 0) {
+                    if (!tasks.isEmpty()) {
                         // Print total number of tasks
-                        System.out.printf("You have %d tasks!\n", taskCount);
+                        System.out.printf("You have %d tasks!\n", tasks.size());
                         // Print all stored tasks, numbered from 1.
-                        for (int i = 0; i < taskCount; i++) {
-                            System.out.println((i + 1) + "." + tasks[i]);
+                        for (int i = 0; i < tasks.size(); i++) {
+                            System.out.println((i + 1) + "." + tasks.get(i));
                         }
                     } else { // No tasks
                         System.out.println("You have no tasks!");
                     }
                 } else if (command.startsWith("unmark")) {
                     int index = parseTaskIndex(input, "unmark");
-                    tasks[index].markAsNotDone();
+                    tasks.get(index).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
-                    System.out.println("  " + tasks[index]);
+                    System.out.println("  " + tasks.get(index));
                 } else if (command.startsWith("mark")) {
                     int index = parseTaskIndex(input, "mark");
-                    tasks[index].markAsDone();
+                    tasks.get(index).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
-                    System.out.println("  " + tasks[index]);
+                    System.out.println("  " + tasks.get(index));
+                } else if (command.startsWith("delete")) {
+                    int index = parseTaskIndex(input, "delete");
+                    Task removed = tasks.remove(index);
+                    System.out.println("Noted. I've removed this task:");
+                    System.out.println("  " + removed);
+                    System.out.println("Now you have " + tasks.size() + " tasks in the list.");
                 } else if (command.startsWith("todo")) {
                     addTask(parseTodo(input));
                 } else if (command.startsWith("deadline")) {
@@ -62,7 +68,8 @@ public class Verity {
                     addTask(parseEvent(input));
                 } else {
                     throw new VerityException(
-                            "That's an invalid command! Try list, todo, deadline, event, mark, unmark, or bye. :)");
+                            "That's an invalid command! >:[\n"
+                                    + "Try list, todo, deadline, event, mark, unmark, delete, or bye. :)");
                 }
             } catch (VerityException e) {
                 System.out.println("ERROR!!! >.<\n" + e.getMessage());
@@ -103,13 +110,13 @@ public class Verity {
     private static Deadline parseDeadline(String input) throws VerityException {
         String rest = input.substring("deadline".length()).trim();
         String[] parts = rest.split("(?i)/by", 2);
-        if (parts.length < 2) {
-            throw new VerityException("A deadline needs a due date! >:( \nAdd `/by <when>` after the task description.");
-        }
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
                     "The description of a deadline can't be empty... :( \nTry `deadline <what to do> /by <when>`.");
+        }
+        if (parts.length < 2) {
+            throw new VerityException("A deadline needs a due date! >:( \nAdd `/by <when>` after the task description.");
         }
         String by = parts[1].trim();
         if (by.isEmpty()) {
@@ -129,13 +136,13 @@ public class Verity {
     private static Event parseEvent(String input) throws VerityException {
         String rest = input.substring("event".length()).trim();
         String[] parts = rest.split("(?i)/from", 2);
-        if (parts.length < 2) {
-            throw new VerityException("An event needs a start time! :| \nAdd `/from <when>` after the description.");
-        }
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
                     "The description of an event can't be empty... :( \nTry `event <what's happening> /from <start> /to <end>`.");
+        }
+        if (parts.length < 2) {
+            throw new VerityException("An event needs a start time! :| \nAdd `/from <when>` after the description.");
         }
         String[] fromTo = parts[1].split("(?i)/to", 2);
         if (fromTo.length < 2) {
@@ -153,12 +160,12 @@ public class Verity {
     }
 
     /**
-     * Parses the task number following a {@code mark}/{@code unmark} command and validates
-     * it against the current task list.
+     * Parses the task number following a {@code mark}/{@code unmark}/{@code delete} command
+     * and validates it against the current task list.
      *
      * @param input Full line of user input, starting with the command name.
-     * @param commandName Command the number was given for, e.g. "mark" or "unmark"; also
-     *                     used to word the error messages and to know how many characters
+     * @param commandName Command the number was given for, e.g. "mark", "unmark", or "delete";
+     *                     also used to word the error messages and to know how many characters
      *                     of {@code input} are the command name.
      * @return 0-based index of the referenced task.
      * @throws VerityException If no number was given, it isn't a number, or it's out of range.
@@ -177,10 +184,10 @@ public class Verity {
                     "'" + rest + "' isn't a valid task number.");
         }
         int index = number - 1;
-        if (index < 0 || index >= taskCount) {
-            String taskWord = taskCount == 1 ? "task" : "tasks";
+        if (index < 0 || index >= tasks.size()) {
+            String taskWord = tasks.size() == 1 ? "task" : "tasks";
             throw new VerityException(
-                    "There is no task " + number + ", you currently only have " + taskCount + " " + taskWord + ".");
+                    "There is no task " + number + ", you currently only have " + tasks.size() + " " + taskWord + ".");
         }
         return index;
     }
@@ -192,10 +199,9 @@ public class Verity {
      * @param task Task to add to the task list.
      */
     private static void addTask(Task task) {
-        tasks[taskCount] = task;
-        taskCount++;
+        tasks.add(task);
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
     }
 }

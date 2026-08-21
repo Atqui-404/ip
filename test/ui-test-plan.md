@@ -50,7 +50,7 @@ Notes:
 
 | Input | Expected Output |
 |---|---|
-| `read book` | `OOPS!!! I don't understand that` |
+| `read book` | `ERROR!!! >.<\nThat's an invalid command!` |
 | `list` | `You have no tasks!` |
 
 ## TC2b: A valid todo still works right after a rejected command
@@ -58,7 +58,7 @@ Notes:
 
 | Input | Expected Output |
 |---|---|
-| `read book` | `OOPS!!! I don't understand that` |
+| `read book` | `ERROR!!! >.<\nThat's an invalid command!` |
 | `todo read book` | `Got it. I've added this task:\n  [T][ ] read book\nNow you have 1 tasks in the list.` |
 | `list` | `You have 1 tasks!\n1.[T][ ] read book` |
 
@@ -77,13 +77,59 @@ Notes:
 | Input | Expected Output |
 |---|---|
 | `todo read book` | `Got it. I've added this task:` |
-| `mark` | `OOPS!!! Tell me which task number to mark` |
-| `mark abc` | `OOPS!!! 'abc' isn't a task number I understand` |
-| `mark 5` | `OOPS!!! There is no task 5 - you currently have 1 task.` |
-| `unmark` | `OOPS!!! Tell me which task number to unmark` |
-| `unmark abc` | `OOPS!!! 'abc' isn't a task number I understand` |
-| `unmark 5` | `OOPS!!! There is no task 5 - you currently have 1 task.` |
+| `mark` | `ERROR!!! >.<\nTell me which task number you want to mark!` |
+| `mark abc` | `ERROR!!! >.<\n'abc' isn't a valid task number.` |
+| `mark 5` | `ERROR!!! >.<\nThere is no task 5, you currently only have 1 task.` |
+| `unmark` | `ERROR!!! >.<\nTell me which task number you want to unmark!` |
+| `unmark abc` | `ERROR!!! >.<\n'abc' isn't a valid task number.` |
+| `unmark 5` | `ERROR!!! >.<\nThere is no task 5, you currently only have 1 task.` |
 | `list` | `1.[T][ ] read book` |
+
+## TC4c: Deleting a task removes it and renumbers the rest
+**Aim:** Level-6: `delete <n>` removes that task, confirms with the task's own text, reports the new total, and the remaining tasks shift down to fill the gap.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `todo write essay` | `Got it. I've added this task:` |
+| `todo walk dog` | `Got it. I've added this task:` |
+| `delete 2` | `Noted. I've removed this task:\n  [T][ ] write essay\nNow you have 2 tasks in the list.` |
+| `list` | `1.[T][ ] read book\n2.[T][ ] walk dog` |
+
+## TC4d: Deleting the first item, then the (now only) last item
+**Aim:** Level-6: deleting task 1 from a 2-item list removes the first item and leaves the second as the new task 1; deleting task 1 again (now the original last item) empties the list.
+
+| Input | Expected Output |
+|---|---|
+| `todo task a` | `Got it. I've added this task:` |
+| `todo task b` | `Got it. I've added this task:` |
+| `delete 1` | `Noted. I've removed this task:\n  [T][ ] task a\nNow you have 1 tasks in the list.` |
+| `list` | `1.[T][ ] task b` |
+| `delete 1` | `Noted. I've removed this task:\n  [T][ ] task b\nNow you have 0 tasks in the list.` |
+| `list` | `You have no tasks!` |
+
+## TC4e: delete error handling
+**Aim:** Level-6/A-Collections: `delete` must reject a missing index, a non-numeric index, and an out-of-range index (reusing the same `parseTaskIndex` validation as mark/unmark), and none of these should remove anything.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `delete` | `ERROR!!! >.<\nTell me which task number you want to delete!` |
+| `delete abc` | `ERROR!!! >.<\n'abc' isn't a valid task number.` |
+| `delete 5` | `ERROR!!! >.<\nThere is no task 5, you currently only have 1 task.` |
+| `list` | `1.[T][ ] read book` |
+
+## TC4f: mark/unmark on task numbers after a delete has shifted the list
+**Aim:** Level-6/A-Collections regression check: after `delete` removes an item and later tasks shift down, `mark`/`list` must operate on the *new* numbering, not stale indices - this specifically catches off-by-one bugs from the array-to-ArrayList switch.
+
+| Input | Expected Output |
+|---|---|
+| `todo task one` | `Got it. I've added this task:` |
+| `todo task two` | `Got it. I've added this task:` |
+| `todo task three` | `Got it. I've added this task:` |
+| `delete 2` | `Noted. I've removed this task:\n  [T][ ] task two\nNow you have 2 tasks in the list.` |
+| `mark 2` | `Nice! I've marked this task as done:\n  [T][X] task three` |
+| `list` | `1.[T][ ] task one\n2.[T][X] task three` |
 
 ## TC5: Saying goodbye
 **Aim:** `bye` ends the session with a farewell message.
@@ -105,7 +151,7 @@ Notes:
 
 | Input | Expected Output |
 |---|---|
-| `todo` | `OOPS!!! The description of a todo can't be empty` |
+| `todo` | `ERROR!!! >.<\nThe description of a todo can't be empty.` |
 | `list` | `You have no tasks!` |
 
 ## TC7: Adding a deadline
@@ -121,9 +167,10 @@ Notes:
 
 | Input | Expected Output |
 |---|---|
-| `deadline return book` | `OOPS!!! A deadline needs a due time` |
-| `deadline /by Sunday` | `OOPS!!! The description of a deadline can't be empty` |
-| `deadline return book /by` | `OOPS!!! The due time after` |
+| `deadline return book` | `ERROR!!! >.<\nA deadline needs a due date!` |
+| `deadline /by Sunday` | `ERROR!!! >.<\nThe description of a deadline can't be empty` |
+| `deadline return book /by` | `ERROR!!! >.<\nThe due time after` |
+| `deadline` | `ERROR!!! >.<\nThe description of a deadline can't be empty` |
 | `list` | `You have no tasks!` |
 
 ## TC8: Adding an event
@@ -138,11 +185,12 @@ Notes:
 
 | Input | Expected Output |
 |---|---|
-| `event project meeting` | `OOPS!!! An event needs a start time` |
-| `event /from Mon /to Tue` | `OOPS!!! The description of an event can't be empty` |
-| `event meeting /from Mon` | `OOPS!!! An event needs an end time` |
-| `event meeting /from /to 4pm` | `OOPS!!! The start time after` |
-| `event meeting /from Mon /to` | `OOPS!!! The end time after` |
+| `event project meeting` | `ERROR!!! >.<\nAn event needs a start time!` |
+| `event /from Mon /to Tue` | `ERROR!!! >.<\nThe description of an event can't be empty` |
+| `event meeting /from Mon` | `ERROR!!! >.<\nAn event needs an end time.` |
+| `event meeting /from /to 4pm` | `ERROR!!! >.<\nThe start time after` |
+| `event meeting /from Mon /to` | `ERROR!!! >.<\nThe end time after` |
+| `event` | `ERROR!!! >.<\nThe description of an event can't be empty` |
 | `list` | `You have no tasks!` |
 
 ## TC9b: Sub-command markers are case-insensitive
