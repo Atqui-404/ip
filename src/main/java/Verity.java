@@ -78,18 +78,18 @@ public class Verity {
                 addTask(new Todo(description));
             } else if (command.startsWith("deadline")) {
                 String rest = input.substring(8).trim();
-                String[] parts = rest.split("/by", 2);
+                String[] parts = rest.split("(?i)/by", 2);
                 String description = parts[0].trim();
                 String by = parts.length > 1 ? parts[1].trim() : "";
                 addTask(new Deadline(description, by));
             } else if (command.startsWith("event")) {
                 String rest = input.substring(5).trim();
-                String[] parts = rest.split("/from", 2);
+                String[] parts = rest.split("(?i)/from", 2);
                 String description = parts[0].trim();
                 String from = "";
                 String to = "";
                 if (parts.length > 1) {
-                    String[] fromTo = parts[1].split("/to", 2);
+                    String[] fromTo = parts[1].split("(?i)/to", 2);
                     from = fromTo[0].trim();
                     to = fromTo.length > 1 ? fromTo[1].trim() : "";
                 }

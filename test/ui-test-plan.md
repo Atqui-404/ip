@@ -96,6 +96,14 @@ Notes:
 |---|---|
 | `event project meeting /from Mon 2pm /to 4pm` | `Got it. I've added this task:\n  [E][ ] project meeting (from: Mon 2pm to: 4pm)\nNow you have 1 tasks in the list.` |
 
+## TC9b: Sub-command markers are case-insensitive
+**Aim:** `/by`, `/from`, and `/to` must be recognised regardless of casing (e.g. `/BY`, `/From`, `/TO`).
+
+| Input | Expected Output |
+|---|---|
+| `deadline return book /BY Sunday` | `[D][ ] return book (by: Sunday)` |
+| `event project meeting /From Mon 2pm /TO 4pm` | `[E][ ] project meeting (from: Mon 2pm to: 4pm)` |
+
 ## TC9: Marking a typed task shows its type tag
 **Aim:** Marking/unmarking a `Deadline`/`Event`/`Todo` must still show its `[D]`/`[E]`/`[T]` tag and date info, not just the bare description, since the mark/unmark output is now built polymorphically from the task itself.
 
