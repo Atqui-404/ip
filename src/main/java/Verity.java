@@ -33,7 +33,13 @@ public class Verity {
                 Lists out all the tasks, numbered from 1, if any exist;
                 Otherwise, print "You have no tasks!" if no tasks.
                  */
-                if (command.equals("list")) {
+                Command matched = Command.match(command);
+                if (matched == null) {
+                    throw new VerityException(
+                            "That's an invalid command! >:[\nTry " + Command.describeAll() + ". :)");
+                }
+                switch (matched) {
+                case LIST: {
                     if (!tasks.isEmpty()) {
                         // Print total number of tasks
                         System.out.printf("You have %d tasks!\n", tasks.size());
@@ -44,32 +50,46 @@ public class Verity {
                     } else { // No tasks
                         System.out.println("You have no tasks!");
                     }
-                } else if (command.startsWith("unmark")) {
-                    int index = parseTaskIndex(input, "unmark");
+                    break;
+                }
+                case UNMARK: {
+                    int index = parseTaskIndex(input, Command.UNMARK);
                     tasks.get(index).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + tasks.get(index));
-                } else if (command.startsWith("mark")) {
-                    int index = parseTaskIndex(input, "mark");
+                    break;
+                }
+                case MARK: {
+                    int index = parseTaskIndex(input, Command.MARK);
                     tasks.get(index).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + tasks.get(index));
-                } else if (command.startsWith("delete")) {
-                    int index = parseTaskIndex(input, "delete");
+                    break;
+                }
+                case DELETE: {
+                    int index = parseTaskIndex(input, Command.DELETE);
                     Task removed = tasks.remove(index);
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removed);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
-                } else if (command.startsWith("todo")) {
+                    break;
+                }
+                case TODO:
                     addTask(parseTodo(input));
-                } else if (command.startsWith("deadline")) {
+                    break;
+                case DEADLINE:
                     addTask(parseDeadline(input));
-                } else if (command.startsWith("event")) {
+                    break;
+                case EVENT:
                     addTask(parseEvent(input));
-                } else {
-                    throw new VerityException(
-                            "That's an invalid command! >:[\n"
-                                    + "Try list, todo, deadline, event, mark, unmark, delete, or bye. :)");
+                    break;
+                case BYE:
+                default:
+                    // BYE is unreachable here: the while-loop condition above already
+                    // exits before "bye" reaches this switch. default is unreachable
+                    // too, since an unrecognized command throws before the switch is
+                    // entered. Both are included only so every Command constant is covered.
+                    break;
                 }
             } catch (VerityException e) {
                 System.out.println("ERROR!!! >.<\n" + e.getMessage());
@@ -163,18 +183,19 @@ public class Verity {
      * Parses the task number following a {@code mark}/{@code unmark}/{@code delete} command
      * and validates it against the current task list.
      *
-     * @param input Full line of user input, starting with the command name.
-     * @param commandName Command the number was given for, e.g. "mark", "unmark", or "delete";
-     *                     also used to word the error messages and to know how many characters
-     *                     of {@code input} are the command name.
+     * @param input Full line of user input, starting with the command keyword.
+     * @param command Command the number was given for (its keyword is used to word the
+     *                error messages and to know how many characters of {@code input}
+     *                are the command word).
      * @return 0-based index of the referenced task.
      * @throws VerityException If no number was given, it isn't a number, or it's out of range.
      */
-    private static int parseTaskIndex(String input, String commandName) throws VerityException {
-        String rest = input.substring(commandName.length()).trim();
+    private static int parseTaskIndex(String input, Command command) throws VerityException {
+        String keyword = command.getKeyword();
+        String rest = input.substring(keyword.length()).trim();
         if (rest.isEmpty()) {
             throw new VerityException(
-                    "Tell me which task number you want to " + commandName + "! For example: `" + commandName + " 2`.");
+                    "Tell me which task number you want to " + keyword + "! For example: `" + keyword + " 2`.");
         }
         int number;
         try {
