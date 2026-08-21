@@ -28,77 +28,44 @@ public class Verity {
         System.out.println(DIVIDER);
 
         while (!command.equals("bye")) {
-            /*
-            Lists out all the tasks from 1 to taskCount if tasks exists;
-            Otherwise, print "You have no tasks!" if no tasks.
-             */
-            if (command.equals("list")) {
-                if (taskCount > 0) {
-                    // Print total number of tasks
-                    System.out.printf("You have %d tasks!\n", taskCount);
-                    // Print all stored tasks, numbered from 1.
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println((i + 1) + "." + tasks[i]);
+            try {
+                /*
+                Lists out all the tasks from 1 to taskCount if tasks exists;
+                Otherwise, print "You have no tasks!" if no tasks.
+                 */
+                if (command.equals("list")) {
+                    if (taskCount > 0) {
+                        // Print total number of tasks
+                        System.out.printf("You have %d tasks!\n", taskCount);
+                        // Print all stored tasks, numbered from 1.
+                        for (int i = 0; i < taskCount; i++) {
+                            System.out.println((i + 1) + "." + tasks[i]);
+                        }
+                    } else { // No tasks
+                        System.out.println("You have no tasks!");
                     }
-                } else { // No tasks
-                    System.out.println("You have no tasks!");
+                } else if (command.startsWith("unmark")) {
+                    int index = parseTaskIndex(input, "unmark");
+                    tasks[index].markAsNotDone();
+                    System.out.println("OK, I've marked this task as not done yet:");
+                    System.out.println("  " + tasks[index]);
+                } else if (command.startsWith("mark")) {
+                    int index = parseTaskIndex(input, "mark");
+                    tasks[index].markAsDone();
+                    System.out.println("Nice! I've marked this task as done:");
+                    System.out.println("  " + tasks[index]);
+                } else if (command.startsWith("todo")) {
+                    addTask(parseTodo(input));
+                } else if (command.startsWith("deadline")) {
+                    addTask(parseDeadline(input));
+                } else if (command.startsWith("event")) {
+                    addTask(parseEvent(input));
+                } else {
+                    throw new VerityException(
+                            "That's an invalid command! Try list, todo, deadline, event, mark, unmark, or bye. :)");
                 }
-            } else if (command.startsWith("unmark")) {
-                try {
-                    int index = Integer.parseInt(input.substring(6).trim()) - 1;
-
-                    if (index >= 0 && index < taskCount) {
-                        tasks[index].markAsNotDone();
-                        System.out.println("OK, I've marked this task as not done yet:");
-                        System.out.println("  " + tasks[index]);
-                    } else { // Index not in range of existing tasks
-                        System.out.println("ERROR: Please input a valid index to unmark as done");
-                    }
-                } catch (NumberFormatException e) { // Index not a number
-                    System.out.println("ERROR: Please input an index to unmark as done");
-                }
-
-            } else if (command.startsWith("mark")) {
-                try {
-                    // "mark 2" -> index 1 (0-based) into the tasks array.
-                    int index = Integer.parseInt(input.substring(4).trim()) - 1;
-
-                    if (index >= 0 && index < taskCount) {
-                        tasks[index].markAsDone();
-                        System.out.println("Nice! I've marked this task as done:");
-                        System.out.println("  " + tasks[index]);
-                    } else { // Index not in range of existing tasks
-                        System.out.println("ERROR: Please input a valid index to mark as done");
-                    }
-                } catch (NumberFormatException e) { // Index not a number or out of range
-                    System.out.println("ERROR: Please input an index to mark as done");
-                }
-            } else if (command.startsWith("todo")) {
-                String description = input.substring(4).trim();
-                addTask(new Todo(description));
-            } else if (command.startsWith("deadline")) {
-                String rest = input.substring(8).trim();
-                String[] parts = rest.split("(?i)/by", 2);
-                String description = parts[0].trim();
-                String by = parts.length > 1 ? parts[1].trim() : "";
-                addTask(new Deadline(description, by));
-            } else if (command.startsWith("event")) {
-                String rest = input.substring(5).trim();
-                String[] parts = rest.split("(?i)/from", 2);
-                String description = parts[0].trim();
-                String from = "";
-                String to = "";
-                if (parts.length > 1) {
-                    String[] fromTo = parts[1].split("(?i)/to", 2);
-                    from = fromTo[0].trim();
-                    to = fromTo.length > 1 ? fromTo[1].trim() : "";
-                }
-                addTask(new Event(description, from, to));
-            } else {
-                // Anything that isn't a recognised command is treated as a new task to store.
-                tasks[taskCount] = new Task(input);
-                taskCount++;
-                System.out.println("added: " + input);
+            } catch (VerityException e) {
+                System.out.println("ERROR!!! >.<\n" + e.getMessage());
             }
             System.out.println(DIVIDER);
             input = scanner.nextLine();
@@ -106,8 +73,116 @@ public class Verity {
             System.out.println(DIVIDER);
         }
 
-        System.out.println("Bye! See you soon!");
+        System.out.println("Bye! See you soon! ;)");
         System.out.println(DIVIDER);
+    }
+
+    /**
+     * Parses a {@code todo} command into a {@link Todo}.
+     *
+     * @param input Full line of user input, starting with "todo".
+     * @return Todo built from the input.
+     * @throws VerityException If the description is empty.
+     */
+    private static Todo parseTodo(String input) throws VerityException {
+        String description = input.substring("todo".length()).trim();
+        if (description.isEmpty()) {
+            throw new VerityException("The description of a todo can't be empty. Try `todo <what you want to do>`. ;)");
+        }
+        return new Todo(description);
+    }
+
+    /**
+     * Parses a {@code deadline} command into a {@link Deadline}.
+     *
+     * @param input Full line of user input, starting with "deadline".
+     * @return Deadline built from the input.
+     * @throws VerityException If the description is empty, the {@code /by} marker is missing,
+     *                          or the due time after it is empty.
+     */
+    private static Deadline parseDeadline(String input) throws VerityException {
+        String rest = input.substring("deadline".length()).trim();
+        String[] parts = rest.split("(?i)/by", 2);
+        if (parts.length < 2) {
+            throw new VerityException("A deadline needs a due date! >:( \nAdd `/by <when>` after the task description.");
+        }
+        String description = parts[0].trim();
+        if (description.isEmpty()) {
+            throw new VerityException(
+                    "The description of a deadline can't be empty... :( \nTry `deadline <what to do> /by <when>`.");
+        }
+        String by = parts[1].trim();
+        if (by.isEmpty()) {
+            throw new VerityException("The due time after `/by` can't be empty. Tell me when it's due.");
+        }
+        return new Deadline(description, by);
+    }
+
+    /**
+     * Parses an {@code event} command into an {@link Event}.
+     *
+     * @param input Full line of user input, starting with "event".
+     * @return Event built from the input.
+     * @throws VerityException If the description is empty, the {@code /from} or {@code /to}
+     *                          marker is missing, or either time after them is empty.
+     */
+    private static Event parseEvent(String input) throws VerityException {
+        String rest = input.substring("event".length()).trim();
+        String[] parts = rest.split("(?i)/from", 2);
+        if (parts.length < 2) {
+            throw new VerityException("An event needs a start time! :| \nAdd `/from <when>` after the description.");
+        }
+        String description = parts[0].trim();
+        if (description.isEmpty()) {
+            throw new VerityException(
+                    "The description of an event can't be empty... :( \nTry `event <what's happening> /from <start> /to <end>`.");
+        }
+        String[] fromTo = parts[1].split("(?i)/to", 2);
+        if (fromTo.length < 2) {
+            throw new VerityException("An event needs an end time. :| \nAdd `/to <when>` after the start time.");
+        }
+        String from = fromTo[0].trim();
+        if (from.isEmpty()) {
+            throw new VerityException("The start time after `/from` can't be empty! \nTell me when it begins.");
+        }
+        String to = fromTo[1].trim();
+        if (to.isEmpty()) {
+            throw new VerityException("The end time after `/to` can't be empty! \nTell me when it ends.");
+        }
+        return new Event(description, from, to);
+    }
+
+    /**
+     * Parses the task number following a {@code mark}/{@code unmark} command and validates
+     * it against the current task list.
+     *
+     * @param input Full line of user input, starting with the command name.
+     * @param commandName Command the number was given for, e.g. "mark" or "unmark"; also
+     *                     used to word the error messages and to know how many characters
+     *                     of {@code input} are the command name.
+     * @return 0-based index of the referenced task.
+     * @throws VerityException If no number was given, it isn't a number, or it's out of range.
+     */
+    private static int parseTaskIndex(String input, String commandName) throws VerityException {
+        String rest = input.substring(commandName.length()).trim();
+        if (rest.isEmpty()) {
+            throw new VerityException(
+                    "Tell me which task number you want to " + commandName + "! For example: `" + commandName + " 2`.");
+        }
+        int number;
+        try {
+            number = Integer.parseInt(rest);
+        } catch (NumberFormatException e) {
+            throw new VerityException(
+                    "'" + rest + "' isn't a valid task number.");
+        }
+        int index = number - 1;
+        if (index < 0 || index >= taskCount) {
+            String taskWord = taskCount == 1 ? "task" : "tasks";
+            throw new VerityException(
+                    "There is no task " + number + ", you currently only have " + taskCount + " " + taskWord + ".");
+        }
+        return index;
     }
 
     /**

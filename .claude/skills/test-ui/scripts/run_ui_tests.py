@@ -30,6 +30,14 @@ import re
 import subprocess
 import sys
 
+# On Windows, stdout/stderr default to the console's codepage (e.g. cp1252),
+# which can't represent every character the program under test might print
+# (or that a test plan's Markdown prose might contain). Reconfigure to UTF-8
+# with substitution instead of crashing mid-report.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+
 
 class TestCase:
     def __init__(self, tc_id, title):
@@ -133,7 +141,9 @@ def run_session(java, classes_dir, main_class, inputs, timeout):
     stdin_text = "\n".join(stdin_lines) + "\n"
     try:
         result = subprocess.run(
-            [java, "-cp", classes_dir, main_class],
+            [java,
+             "-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8", "-Dstdin.encoding=UTF-8",
+             "-cp", classes_dir, main_class],
             input=stdin_text,
             capture_output=True, text=True, encoding="utf-8", errors="replace",
             timeout=timeout,
