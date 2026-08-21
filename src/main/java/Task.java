@@ -48,4 +48,15 @@ public class Task {
     public void markAsNotDone() {
         isDone = false;
     }
+
+    /**
+     * Returns the status icon and description of this task, e.g. {@code "[X] read book"}.
+     * Subclasses prepend a type tag (e.g. {@code "[T]"}) and may append extra details.
+     *
+     * @return String representation of this task.
+     */
+    @Override
+    public String toString() {
+        return "[" + getStatusIcon() + "] " + description;
+    }
 }
