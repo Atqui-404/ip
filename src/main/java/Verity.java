@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -12,7 +13,7 @@ public class Verity {
             + "                             |___/ \n";
 
     // A-Collections: dynamically-sized storage for tasks, so there's no
-    // fixed capacity to run out of (no need to persist to disk yet).
+    // fixed capacity to run out of.
     private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -57,6 +58,7 @@ public class Verity {
                     tasks.get(index).markAsNotDone();
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + tasks.get(index));
+                    saveTasks();
                     break;
                 }
                 case MARK: {
@@ -64,6 +66,7 @@ public class Verity {
                     tasks.get(index).markAsDone();
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + tasks.get(index));
+                    saveTasks();
                     break;
                 }
                 case DELETE: {
@@ -72,6 +75,7 @@ public class Verity {
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removed);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+                    saveTasks();
                     break;
                 }
                 case TODO:
@@ -224,5 +228,17 @@ public class Verity {
         System.out.println("Got it. I've added this task:");
         System.out.println("  " + task);
         System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+        saveTasks();
+    }
+
+    /**
+     * Saves the current task list to disk, printing a message if the save fails.
+     */
+    private static void saveTasks() {
+        try {
+            Storage.save(tasks);
+        } catch (IOException e) {
+            System.out.println("Warning: could not save tasks to disk (" + e.getMessage() + ")");
+        }
     }
 }

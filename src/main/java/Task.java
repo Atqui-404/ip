@@ -59,4 +59,15 @@ public class Task {
     public String toString() {
         return "[" + getStatusIcon() + "] " + description;
     }
+
+    /**
+     * Returns this task's completion status and description in save-file format,
+     * e.g. {@code "1 | read book"}. Subclasses prepend a type tag (e.g. {@code "T"})
+     * and may append extra fields, each separated by {@code " | "}.
+     *
+     * @return Save-file representation of this task.
+     */
+    public String toSaveFormat() {
+        return (isDone ? "1" : "0") + " | " + description;
+    }
 }
