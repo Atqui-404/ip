@@ -18,6 +18,15 @@ public class Deadline extends Task {
         this.by = by;
     }
 
+    /**
+     * Returns the date by which this task should be done.
+     *
+     * @return Due date of this deadline.
+     */
+    public LocalDate getBy() {
+        return by;
+    }
+
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by.format(DATE_DISPLAY_FORMAT) + ")";

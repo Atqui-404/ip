@@ -57,6 +57,11 @@ public class Verity {
                     }
                     break;
                 }
+                case ON: {
+                    LocalDate date = parseOnDate(input);
+                    printTasksOnDate(date);
+                    break;
+                }
                 case UNMARK: {
                     int index = parseTaskIndex(input, Command.UNMARK);
                     tasks.get(index).markAsNotDone();
@@ -171,6 +176,21 @@ public class Verity {
     }
 
     /**
+     * Parses an {@code on} command into the date to filter tasks by.
+     *
+     * @param input Full line of user input, starting with "on".
+     * @return Date to filter deadlines/events by.
+     * @throws VerityException If no date is given, or it isn't a valid {@code yyyy-MM-dd} date.
+     */
+    private static LocalDate parseOnDate(String input) throws VerityException {
+        String text = input.substring("on".length()).trim();
+        if (text.isEmpty()) {
+            throw new VerityException("Tell me which date to look up! Try `on <yyyy-MM-dd>`, e.g. `on 2019-10-15`.");
+        }
+        return parseDate(text, "on");
+    }
+
+    /**
      * Parses an {@code event} command into an {@link Event}.
      *
      * @param input Full line of user input, starting with "event".
@@ -237,6 +257,50 @@ public class Verity {
                     "There is no task " + number + ", you currently only have " + tasks.size() + " " + taskWord + ".");
         }
         return index;
+    }
+
+    /**
+     * Prints every deadline due, or event spanning, the given date, numbered from 1.
+     * Prints a "no tasks" message instead if nothing matches.
+     *
+     * @param date Date to filter tasks by.
+     */
+    private static void printTasksOnDate(LocalDate date) {
+        ArrayList<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (isOnDate(task, date)) {
+                matches.add(task);
+            }
+        }
+        String formattedDate = date.format(Task.DATE_DISPLAY_FORMAT);
+        if (matches.isEmpty()) {
+            System.out.println("You have no tasks on " + formattedDate + "!");
+            return;
+        }
+        System.out.printf("You have %d tasks on %s!\n", matches.size(), formattedDate);
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println((i + 1) + "." + matches.get(i));
+        }
+    }
+
+    /**
+     * Returns whether the given task falls on the given date: a {@link Deadline} matches if
+     * its due date equals {@code date}; an {@link Event} matches if {@code date} falls within
+     * its start and end date (inclusive). A {@link Todo} never matches, since it has no date.
+     *
+     * @param task Task to check.
+     * @param date Date to check against.
+     * @return {@code true} if the task falls on the given date.
+     */
+    private static boolean isOnDate(Task task, LocalDate date) {
+        if (task instanceof Deadline) {
+            return ((Deadline) task).getBy().equals(date);
+        }
+        if (task instanceof Event) {
+            Event event = (Event) task;
+            return !date.isBefore(event.getFrom()) && !date.isAfter(event.getTo());
+        }
+        return false;
     }
 
     /**

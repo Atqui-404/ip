@@ -212,3 +212,30 @@ Notes:
 | `event project meeting /from 2019-08-06 /to 2019-08-07` | `added this task` |
 | `mark 1` | `Nice! I've marked this task as done:\n  [E][X] project meeting (from: Aug 06 2019 to: Aug 07 2019)` |
 | `unmark 1` | `OK, I've marked this task as not done yet:\n  [E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)` |
+
+## TC11: `on` lists deadlines/events happening on a given date
+**Aim:** Level-8 stretch goal: `on <date>` lists every deadline due, and every event spanning, the given date. A todo never matches since it has no date, and a deadline/event on a different date is excluded.
+
+| Input | Expected Output |
+|---|---|
+| `deadline return book /by 2019-12-02` | `Got it. I've added this task:` |
+| `event conference /from 2019-12-01 /to 2019-12-03` | `Got it. I've added this task:` |
+| `todo unrelated task` | `Got it. I've added this task:` |
+| `deadline other deadline /by 2019-12-25` | `Got it. I've added this task:` |
+| `on 2019-12-02` | `You have 2 tasks on Dec 02 2019!\n1.[D][ ] return book (by: Dec 02 2019)\n2.[E][ ] conference (from: Dec 01 2019 to: Dec 03 2019)` |
+
+## TC11b: `on` with no matching tasks
+**Aim:** Level-8 stretch goal: querying a date with nothing due/happening on it should say so, not print an empty list.
+
+| Input | Expected Output |
+|---|---|
+| `deadline return book /by 2019-12-02` | `Got it. I've added this task:` |
+| `on 2020-01-01` | `You have no tasks on Jan 01 2020!` |
+
+## TC11c: `on` error handling
+**Aim:** Level-8 stretch goal: `on` with no date, or a date that isn't a valid `yyyy-MM-dd` date, must be rejected like other date inputs.
+
+| Input | Expected Output |
+|---|---|
+| `on` | `ERROR!!! >.<\nTell me which date to look up!` |
+| `on someday` | `ERROR!!! >.<\nThe date after `on` must be in yyyy-MM-dd format` |
