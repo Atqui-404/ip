@@ -30,6 +30,9 @@ public class Storage {
     /**
      * Loads tasks previously written by {@link #save}, in the order they appear in the file.
      * Returns an empty list if the file doesn't exist yet, e.g. on the very first run.
+     * A line that isn't in the expected format is skipped (with a warning printed to the
+     * console) rather than aborting the whole load, so one corrupted line doesn't cost the
+     * user every other saved task.
      *
      * @return Tasks read from disk.
      * @throws IOException If the file exists but could not be read.
@@ -39,8 +42,18 @@ public class Storage {
         if (!Files.exists(FILE_PATH)) {
             return tasks;
         }
-        for (String line : Files.readAllLines(FILE_PATH)) {
-            tasks.add(parseTask(line));
+        List<String> lines = Files.readAllLines(FILE_PATH);
+        for (int lineNumber = 1; lineNumber <= lines.size(); lineNumber++) {
+            String line = lines.get(lineNumber - 1);
+            if (line.isBlank()) {
+                continue;
+            }
+            try {
+                tasks.add(parseTask(line));
+            } catch (CorruptedSaveDataException e) {
+                System.out.println("Warning: skipping corrupted save-file line " + lineNumber
+                        + " (" + e.getMessage() + ")");
+            }
         }
         return tasks;
     }
@@ -51,14 +64,23 @@ public class Storage {
      *
      * @param line Save-format line, as written by {@link Task#toSaveFormat()}.
      * @return Task the line represents.
+     * @throws CorruptedSaveDataException If the line doesn't have enough fields, has an
+     *                                     unrecognized task type, or an invalid done flag.
      */
-    private static Task parseTask(String line) {
-        String[] fields = line.split("\\|");
+    private static Task parseTask(String line) throws CorruptedSaveDataException {
+        String[] fields = line.split("\\|", -1);
         for (int i = 0; i < fields.length; i++) {
             fields[i] = fields[i].trim();
         }
+        if (fields.length < 3) {
+            throw new CorruptedSaveDataException("expected at least 3 fields, found " + fields.length);
+        }
         String type = fields[0];
-        boolean isDone = fields[1].equals("1");
+        String doneFlag = fields[1];
+        if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
+            throw new CorruptedSaveDataException("done flag must be '0' or '1', found '" + doneFlag + "'");
+        }
+        boolean isDone = doneFlag.equals("1");
         String description = fields[2];
 
         Task task;
@@ -67,13 +89,19 @@ public class Storage {
             task = new Todo(description);
             break;
         case "D":
+            if (fields.length < 4) {
+                throw new CorruptedSaveDataException("deadline is missing its due-date field");
+            }
             task = new Deadline(description, fields[3]);
             break;
         case "E":
+            if (fields.length < 5) {
+                throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
+            }
             task = new Event(description, fields[3], fields[4]);
             break;
         default:
-            throw new IllegalStateException("Unknown task type in save file: " + type);
+            throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
         }
         if (isDone) {
             task.markAsDone();
