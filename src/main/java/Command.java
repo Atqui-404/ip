@@ -6,6 +6,7 @@
  */
 public enum Command {
     LIST("list", false),
+    ON("on", true),
     TODO("todo", true),
     DEADLINE("deadline", true),
     EVENT("event", true),

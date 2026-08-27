@@ -1,5 +1,6 @@
 import java.io.IOException;
-
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -54,6 +55,11 @@ public class Verity {
                     } else { // No tasks
                         System.out.println("You have no tasks!");
                     }
+                    break;
+                }
+                case ON: {
+                    LocalDate date = parseOnDate(input);
+                    printTasksOnDate(date);
                     break;
                 }
                 case UNMARK: {
@@ -132,7 +138,7 @@ public class Verity {
      * @param input Full line of user input, starting with "deadline".
      * @return Deadline built from the input.
      * @throws VerityException If the description is empty, the {@code /by} marker is missing,
-     *                          or the due time after it is empty.
+     *                          the due date after it is empty, or isn't a valid {@code yyyy-MM-dd} date.
      */
     private static Deadline parseDeadline(String input) throws VerityException {
         String rest = input.substring("deadline".length()).trim();
@@ -149,7 +155,39 @@ public class Verity {
         if (by.isEmpty()) {
             throw new VerityException("The due time after `/by` can't be empty. Tell me when it's due.");
         }
-        return new Deadline(description, by);
+        return new Deadline(description, parseDate(by, "/by"));
+    }
+
+    /**
+     * Parses a date string in {@code yyyy-MM-dd} format, e.g. "2019-10-15".
+     *
+     * @param text Date text to parse.
+     * @param marker Marker the date followed (e.g. "/by"), used to word the error message.
+     * @return Parsed date.
+     * @throws VerityException If the text isn't a valid date in {@code yyyy-MM-dd} format.
+     */
+    private static LocalDate parseDate(String text, String marker) throws VerityException {
+        try {
+            return LocalDate.parse(text);
+        } catch (DateTimeParseException e) {
+            throw new VerityException("The date after `" + marker
+                    + "` must be in yyyy-MM-dd format (e.g. 2019-10-15), not '" + text + "'.");
+        }
+    }
+
+    /**
+     * Parses an {@code on} command into the date to filter tasks by.
+     *
+     * @param input Full line of user input, starting with "on".
+     * @return Date to filter deadlines/events by.
+     * @throws VerityException If no date is given, or it isn't a valid {@code yyyy-MM-dd} date.
+     */
+    private static LocalDate parseOnDate(String input) throws VerityException {
+        String text = input.substring("on".length()).trim();
+        if (text.isEmpty()) {
+            throw new VerityException("Tell me which date to look up! Try `on <yyyy-MM-dd>`, e.g. `on 2019-10-15`.");
+        }
+        return parseDate(text, "on");
     }
 
     /**
@@ -158,7 +196,8 @@ public class Verity {
      * @param input Full line of user input, starting with "event".
      * @return Event built from the input.
      * @throws VerityException If the description is empty, the {@code /from} or {@code /to}
-     *                          marker is missing, or either time after them is empty.
+     *                          marker is missing, either date after them is empty, or isn't a
+     *                          valid {@code yyyy-MM-dd} date.
      */
     private static Event parseEvent(String input) throws VerityException {
         String rest = input.substring("event".length()).trim();
@@ -183,7 +222,7 @@ public class Verity {
         if (to.isEmpty()) {
             throw new VerityException("The end time after `/to` can't be empty! \nTell me when it ends.");
         }
-        return new Event(description, from, to);
+        return new Event(description, parseDate(from, "/from"), parseDate(to, "/to"));
     }
 
     /**
@@ -218,6 +257,50 @@ public class Verity {
                     "There is no task " + number + ", you currently only have " + tasks.size() + " " + taskWord + ".");
         }
         return index;
+    }
+
+    /**
+     * Prints every deadline due, or event spanning, the given date, numbered from 1.
+     * Prints a "no tasks" message instead if nothing matches.
+     *
+     * @param date Date to filter tasks by.
+     */
+    private static void printTasksOnDate(LocalDate date) {
+        ArrayList<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (isOnDate(task, date)) {
+                matches.add(task);
+            }
+        }
+        String formattedDate = date.format(Task.DATE_DISPLAY_FORMAT);
+        if (matches.isEmpty()) {
+            System.out.println("You have no tasks on " + formattedDate + "!");
+            return;
+        }
+        System.out.printf("You have %d tasks on %s!\n", matches.size(), formattedDate);
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println((i + 1) + "." + matches.get(i));
+        }
+    }
+
+    /**
+     * Returns whether the given task falls on the given date: a {@link Deadline} matches if
+     * its due date equals {@code date}; an {@link Event} matches if {@code date} falls within
+     * its start and end date (inclusive). A {@link Todo} never matches, since it has no date.
+     *
+     * @param task Task to check.
+     * @param date Date to check against.
+     * @return {@code true} if the task falls on the given date.
+     */
+    private static boolean isOnDate(Task task, LocalDate date) {
+        if (task instanceof Deadline) {
+            return ((Deadline) task).getBy().equals(date);
+        }
+        if (task instanceof Event) {
+            Event event = (Event) task;
+            return !date.isBefore(event.getFrom()) && !date.isAfter(event.getTo());
+        }
+        return false;
     }
 
     /**

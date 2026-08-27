@@ -155,41 +155,44 @@ Notes:
 | `list` | `You have no tasks!` |
 
 ## TC7: Adding a deadline
-**Aim:** `deadline <desc> /by <when>` adds a task tagged `[D]` with the `by` text shown verbatim (no date parsing at this stage).
+**Aim:** Level-8: `deadline <desc> /by <date>` adds a task tagged `[D]`; the date is parsed from `yyyy-MM-dd` input and displayed as `MMM dd yyyy`, not shown verbatim.
 
 | Input | Expected Output |
 |---|---|
-| `deadline return book /by Sunday` | `Got it. I've added this task:\n  [D][ ] return book (by: Sunday)\nNow you have 1 tasks in the list.` |
-| `deadline do homework /by no idea :-p` | `[D][ ] do homework (by: no idea :-p)` |
+| `deadline return book /by 2019-06-06` | `Got it. I've added this task:\n  [D][ ] return book (by: Jun 06 2019)\nNow you have 1 tasks in the list.` |
+| `deadline submit report /by 2024-01-01` | `[D][ ] submit report (by: Jan 01 2024)` |
 
 ## TC7b: deadline error handling
-**Aim:** Level-5: a `deadline` missing `/by` entirely, missing its description, or missing the due time after `/by` must each be rejected with a distinct message.
+**Aim:** Level-5/8: a `deadline` missing `/by` entirely, missing its description, missing the due date after `/by`, or given text that isn't a valid `yyyy-MM-dd` date must each be rejected with a distinct message.
 
 | Input | Expected Output |
 |---|---|
 | `deadline return book` | `ERROR!!! >.<\nA deadline needs a due date!` |
-| `deadline /by Sunday` | `ERROR!!! >.<\nThe description of a deadline can't be empty` |
+| `deadline /by 2019-06-06` | `ERROR!!! >.<\nThe description of a deadline can't be empty` |
 | `deadline return book /by` | `ERROR!!! >.<\nThe due time after` |
+| `deadline return book /by tomorrow` | `ERROR!!! >.<\nThe date after `/by` must be in yyyy-MM-dd format` |
 | `deadline` | `ERROR!!! >.<\nThe description of a deadline can't be empty` |
 | `list` | `You have no tasks!` |
 
 ## TC8: Adding an event
-**Aim:** `event <desc> /from <start> /to <end>` adds a task tagged `[E]` with both the start and end text shown verbatim.
+**Aim:** Level-8: `event <desc> /from <start-date> /to <end-date>` adds a task tagged `[E]` with both dates parsed from `yyyy-MM-dd` input and displayed as `MMM dd yyyy`.
 
 | Input | Expected Output |
 |---|---|
-| `event project meeting /from Mon 2pm /to 4pm` | `Got it. I've added this task:\n  [E][ ] project meeting (from: Mon 2pm to: 4pm)\nNow you have 1 tasks in the list.` |
+| `event project meeting /from 2019-08-06 /to 2019-08-07` | `Got it. I've added this task:\n  [E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)\nNow you have 1 tasks in the list.` |
 
 ## TC8b: event error handling
-**Aim:** Level-5: an `event` missing `/from`, missing `/to`, missing its description, or missing either time must each be rejected with a distinct message.
+**Aim:** Level-5/8: an `event` missing `/from`, missing `/to`, missing its description, missing either date, or given a `/from`/`/to` value that isn't a valid `yyyy-MM-dd` date must each be rejected with a distinct message.
 
 | Input | Expected Output |
 |---|---|
 | `event project meeting` | `ERROR!!! >.<\nAn event needs a start time!` |
-| `event /from Mon /to Tue` | `ERROR!!! >.<\nThe description of an event can't be empty` |
-| `event meeting /from Mon` | `ERROR!!! >.<\nAn event needs an end time.` |
-| `event meeting /from /to 4pm` | `ERROR!!! >.<\nThe start time after` |
-| `event meeting /from Mon /to` | `ERROR!!! >.<\nThe end time after` |
+| `event /from 2019-08-06 /to 2019-08-07` | `ERROR!!! >.<\nThe description of an event can't be empty` |
+| `event meeting /from 2019-08-06` | `ERROR!!! >.<\nAn event needs an end time.` |
+| `event meeting /from /to 2019-08-07` | `ERROR!!! >.<\nThe start time after` |
+| `event meeting /from 2019-08-06 /to` | `ERROR!!! >.<\nThe end time after` |
+| `event meeting /from tomorrow /to 2019-08-07` | `ERROR!!! >.<\nThe date after `/from` must be in yyyy-MM-dd format` |
+| `event meeting /from 2019-08-06 /to whenever` | `ERROR!!! >.<\nThe date after `/to` must be in yyyy-MM-dd format` |
 | `event` | `ERROR!!! >.<\nThe description of an event can't be empty` |
 | `list` | `You have no tasks!` |
 
@@ -198,14 +201,41 @@ Notes:
 
 | Input | Expected Output |
 |---|---|
-| `deadline return book /BY Sunday` | `[D][ ] return book (by: Sunday)` |
-| `event project meeting /From Mon 2pm /TO 4pm` | `[E][ ] project meeting (from: Mon 2pm to: 4pm)` |
+| `deadline return book /BY 2019-06-06` | `[D][ ] return book (by: Jun 06 2019)` |
+| `event project meeting /From 2019-08-06 /TO 2019-08-07` | `[E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)` |
 
 ## TC9: Marking a typed task shows its type tag
 **Aim:** Marking/unmarking a `Deadline`/`Event`/`Todo` must still show its `[D]`/`[E]`/`[T]` tag and date info, not just the bare description, since the mark/unmark output is now built polymorphically from the task itself.
 
 | Input | Expected Output |
 |---|---|
-| `event project meeting /from Mon 2pm /to 4pm` | `added this task` |
-| `mark 1` | `Nice! I've marked this task as done:\n  [E][X] project meeting (from: Mon 2pm to: 4pm)` |
-| `unmark 1` | `OK, I've marked this task as not done yet:\n  [E][ ] project meeting (from: Mon 2pm to: 4pm)` |
+| `event project meeting /from 2019-08-06 /to 2019-08-07` | `added this task` |
+| `mark 1` | `Nice! I've marked this task as done:\n  [E][X] project meeting (from: Aug 06 2019 to: Aug 07 2019)` |
+| `unmark 1` | `OK, I've marked this task as not done yet:\n  [E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)` |
+
+## TC11: `on` lists deadlines/events happening on a given date
+**Aim:** Level-8 stretch goal: `on <date>` lists every deadline due, and every event spanning, the given date. A todo never matches since it has no date, and a deadline/event on a different date is excluded.
+
+| Input | Expected Output |
+|---|---|
+| `deadline return book /by 2019-12-02` | `Got it. I've added this task:` |
+| `event conference /from 2019-12-01 /to 2019-12-03` | `Got it. I've added this task:` |
+| `todo unrelated task` | `Got it. I've added this task:` |
+| `deadline other deadline /by 2019-12-25` | `Got it. I've added this task:` |
+| `on 2019-12-02` | `You have 2 tasks on Dec 02 2019!\n1.[D][ ] return book (by: Dec 02 2019)\n2.[E][ ] conference (from: Dec 01 2019 to: Dec 03 2019)` |
+
+## TC11b: `on` with no matching tasks
+**Aim:** Level-8 stretch goal: querying a date with nothing due/happening on it should say so, not print an empty list.
+
+| Input | Expected Output |
+|---|---|
+| `deadline return book /by 2019-12-02` | `Got it. I've added this task:` |
+| `on 2020-01-01` | `You have no tasks on Jan 01 2020!` |
+
+## TC11c: `on` error handling
+**Aim:** Level-8 stretch goal: `on` with no date, or a date that isn't a valid `yyyy-MM-dd` date, must be rejected like other date inputs.
+
+| Input | Expected Output |
+|---|---|
+| `on` | `ERROR!!! >.<\nTell me which date to look up!` |
+| `on someday` | `ERROR!!! >.<\nThe date after `on` must be in yyyy-MM-dd format` |
