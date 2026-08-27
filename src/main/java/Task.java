@@ -1,8 +1,13 @@
+import java.time.format.DateTimeFormatter;
+
 /**
  * Represents a task that the user wants to keep track of.
  * Each task has a description and a completion status.
  */
 public class Task {
+    /** Format dates are shown to the user in, e.g. "Oct 15 2019". */
+    protected static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
+
     protected String description;
     protected boolean isDone;
 

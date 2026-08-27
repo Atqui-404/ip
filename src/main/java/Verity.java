@@ -1,5 +1,6 @@
 import java.io.IOException;
-
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -132,7 +133,7 @@ public class Verity {
      * @param input Full line of user input, starting with "deadline".
      * @return Deadline built from the input.
      * @throws VerityException If the description is empty, the {@code /by} marker is missing,
-     *                          or the due time after it is empty.
+     *                          the due date after it is empty, or isn't a valid {@code yyyy-MM-dd} date.
      */
     private static Deadline parseDeadline(String input) throws VerityException {
         String rest = input.substring("deadline".length()).trim();
@@ -149,7 +150,24 @@ public class Verity {
         if (by.isEmpty()) {
             throw new VerityException("The due time after `/by` can't be empty. Tell me when it's due.");
         }
-        return new Deadline(description, by);
+        return new Deadline(description, parseDate(by, "/by"));
+    }
+
+    /**
+     * Parses a date string in {@code yyyy-MM-dd} format, e.g. "2019-10-15".
+     *
+     * @param text Date text to parse.
+     * @param marker Marker the date followed (e.g. "/by"), used to word the error message.
+     * @return Parsed date.
+     * @throws VerityException If the text isn't a valid date in {@code yyyy-MM-dd} format.
+     */
+    private static LocalDate parseDate(String text, String marker) throws VerityException {
+        try {
+            return LocalDate.parse(text);
+        } catch (DateTimeParseException e) {
+            throw new VerityException("The date after `" + marker
+                    + "` must be in yyyy-MM-dd format (e.g. 2019-10-15), not '" + text + "'.");
+        }
     }
 
     /**
@@ -158,7 +176,8 @@ public class Verity {
      * @param input Full line of user input, starting with "event".
      * @return Event built from the input.
      * @throws VerityException If the description is empty, the {@code /from} or {@code /to}
-     *                          marker is missing, or either time after them is empty.
+     *                          marker is missing, either date after them is empty, or isn't a
+     *                          valid {@code yyyy-MM-dd} date.
      */
     private static Event parseEvent(String input) throws VerityException {
         String rest = input.substring("event".length()).trim();
@@ -183,7 +202,7 @@ public class Verity {
         if (to.isEmpty()) {
             throw new VerityException("The end time after `/to` can't be empty! \nTell me when it ends.");
         }
-        return new Event(description, from, to);
+        return new Event(description, parseDate(from, "/from"), parseDate(to, "/to"));
     }
 
     /**

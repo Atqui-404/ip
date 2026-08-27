@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,13 +94,13 @@ public class Storage {
             if (fields.length < 4) {
                 throw new CorruptedSaveDataException("deadline is missing its due-date field");
             }
-            task = new Deadline(description, fields[3]);
+            task = new Deadline(description, parseSavedDate(fields[3]));
             break;
         case "E":
             if (fields.length < 5) {
                 throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
             }
-            task = new Event(description, fields[3], fields[4]);
+            task = new Event(description, parseSavedDate(fields[3]), parseSavedDate(fields[4]));
             break;
         default:
             throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
@@ -107,5 +109,21 @@ public class Storage {
             task.markAsDone();
         }
         return task;
+    }
+
+    /**
+     * Parses a save-file date field (ISO format, e.g. {@code "2019-10-15"}), as written by
+     * {@link Deadline#toSaveFormat()}/{@link Event#toSaveFormat()}.
+     *
+     * @param text Date field to parse.
+     * @return Parsed date.
+     * @throws CorruptedSaveDataException If the text isn't a valid ISO date.
+     */
+    private static LocalDate parseSavedDate(String text) throws CorruptedSaveDataException {
+        try {
+            return LocalDate.parse(text);
+        } catch (DateTimeParseException e) {
+            throw new CorruptedSaveDataException("invalid date '" + text + "', expected yyyy-MM-dd");
+        }
     }
 }
