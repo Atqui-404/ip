@@ -27,6 +27,7 @@ import argparse
 import glob
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -161,6 +162,9 @@ def main():
     parser.add_argument("--main-class", default="Verity")
     parser.add_argument("--source-dir", default="src/main/java")
     parser.add_argument("--classes-dir", default="out/production/ip")
+    parser.add_argument("--data-dir", default="data",
+                         help="Directory the app saves task data to; wiped before each "
+                              "test case so saved state from one case can't leak into the next.")
     parser.add_argument("--java", default="java")
     parser.add_argument("--javac", default="javac")
     parser.add_argument("--skip-compile", action="store_true")
@@ -199,6 +203,12 @@ def main():
         print(">> Console session (stdin sent, in order):")
         for line in inputs:
             print(f"    {line}")
+
+        # Each test case must start from a blank slate. The app now persists tasks to
+        # disk (Level 7), so without this a test case would silently inherit tasks
+        # saved by an earlier one, even though it runs in its own fresh OS process.
+        if os.path.isdir(args.data_dir):
+            shutil.rmtree(args.data_dir)
 
         stdin_lines, stdout, stderr, timed_out = run_session(
             args.java, args.classes_dir, args.main_class, inputs, args.timeout,

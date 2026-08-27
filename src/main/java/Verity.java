@@ -23,6 +23,8 @@ public class Verity {
         System.out.println("Ask me anything! I know everything!");
         System.out.println(DIVIDER);
 
+        loadTasks();
+
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         String command = input.toLowerCase();
@@ -239,6 +241,17 @@ public class Verity {
             Storage.save(tasks);
         } catch (IOException e) {
             System.out.println("Warning: could not save tasks to disk (" + e.getMessage() + ")");
+        }
+    }
+
+    /**
+     * Loads the previously saved task list from disk, printing a message if the load fails.
+     */
+    private static void loadTasks() {
+        try {
+            tasks.addAll(Storage.load());
+        } catch (IOException e) {
+            System.out.println("Warning: could not load saved tasks (" + e.getMessage() + ")");
         }
     }
 }
