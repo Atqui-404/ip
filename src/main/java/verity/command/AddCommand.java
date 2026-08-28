@@ -1,3 +1,10 @@
+package verity.command;
+
+import verity.storage.Storage;
+import verity.task.Task;
+import verity.task.TaskList;
+import verity.ui.Ui;
+
 /**
  * Adds a task to the task list.
  */

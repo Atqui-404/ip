@@ -1,3 +1,5 @@
+package verity.parser;
+
 /**
  * The set of command keywords Verity recognizes. Each constant knows its own
  * keyword and whether that keyword must match the whole input exactly (no

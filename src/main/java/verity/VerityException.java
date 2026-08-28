@@ -1,3 +1,5 @@
+package verity;
+
 /**
  * Signals that the user's input could not be understood or acted on.
  * Thrown by command parsing/validation logic and caught once in the

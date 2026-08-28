@@ -1,3 +1,11 @@
+package verity.command;
+
+import verity.VerityException;
+import verity.storage.Storage;
+import verity.task.Task;
+import verity.task.TaskList;
+import verity.ui.Ui;
+
 /**
  * Removes a task from the task list.
  */

@@ -1,3 +1,5 @@
+package verity.storage;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -5,6 +7,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import verity.task.Deadline;
+import verity.task.Event;
+import verity.task.Task;
+import verity.task.Todo;
 
 /**
  * Reads and writes a task list to a fixed file on disk, so tasks persist

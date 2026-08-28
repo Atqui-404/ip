@@ -1,6 +1,8 @@
+package verity.storage;
+
 /**
  * Signals that a line in the save file was not in the expected format and
- * could not be parsed back into a {@link Task}.
+ * could not be parsed back into a task.
  */
 public class CorruptedSaveDataException extends Exception {
 

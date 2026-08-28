@@ -1,3 +1,5 @@
+package verity.task;
+
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -6,7 +8,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class Task {
     /** Format dates are shown to the user in, e.g. "Oct 15 2019". */
-    protected static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
+    public static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
 
     protected String description;
     protected boolean isDone;

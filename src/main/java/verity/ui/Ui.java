@@ -1,6 +1,10 @@
+package verity.ui;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
+
+import verity.task.Task;
 
 /**
  * Handles all interaction with the user: printing messages to the console

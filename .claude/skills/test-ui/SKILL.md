@@ -53,7 +53,7 @@ python .claude/skills/test-ui/scripts/run_ui_tests.py test/ui-test-plan.md
 ```
 
 If the app's main class, source directory, or output directory differs from
-the defaults (`Verity`, `src/main/java`, `out/production/ip`), pass
+the defaults (`verity.Verity`, `src/main/java`, `out/production/ip`), pass
 `--main-class`, `--source-dir`, or `--classes-dir` accordingly — check
 `src/main/java` for the class containing `public static void main`.
 

@@ -1,4 +1,11 @@
+package verity.command;
+
 import java.io.IOException;
+
+import verity.VerityException;
+import verity.storage.Storage;
+import verity.task.TaskList;
+import verity.ui.Ui;
 
 /**
  * Represents a single user command: something that can be executed against

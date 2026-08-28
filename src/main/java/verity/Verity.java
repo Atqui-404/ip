@@ -1,4 +1,12 @@
+package verity;
+
 import java.io.IOException;
+
+import verity.command.Command;
+import verity.parser.Parser;
+import verity.storage.Storage;
+import verity.task.TaskList;
+import verity.ui.Ui;
 
 /**
  * Entry point and top-level orchestrator: owns the {@link Ui}, {@link Storage}, and

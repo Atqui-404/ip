@@ -1,3 +1,9 @@
+package verity.command;
+
+import verity.storage.Storage;
+import verity.task.TaskList;
+import verity.ui.Ui;
+
 /**
  * Lists every task currently in the task list.
  */

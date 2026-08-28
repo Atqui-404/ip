@@ -159,7 +159,7 @@ def run_session(java, classes_dir, main_class, inputs, timeout):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("plan", nargs="?", default="test/ui-test-plan.md")
-    parser.add_argument("--main-class", default="Verity")
+    parser.add_argument("--main-class", default="verity.Verity")
     parser.add_argument("--source-dir", default="src/main/java")
     parser.add_argument("--classes-dir", default="out/production/ip")
     parser.add_argument("--data-dir", default="data",
