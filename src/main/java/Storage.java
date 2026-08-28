@@ -7,26 +7,38 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reads and writes the task list to a fixed location on disk, so tasks
- * persist between runs of the program.
+ * Reads and writes a task list to a fixed file on disk, so tasks persist
+ * between runs of the program.
  */
 public class Storage {
-    private static final Path FILE_PATH = Path.of("data", "verity.txt");
+    private final Path filePath;
+
+    /**
+     * Creates a storage backed by the given file.
+     *
+     * @param filePath Relative path to the save file, e.g. "data/verity.txt".
+     */
+    public Storage(String filePath) {
+        this.filePath = Path.of(filePath);
+    }
 
     /**
      * Writes the given tasks to disk, one per line, in save format.
-     * Creates the containing "data" directory first if it doesn't already exist.
+     * Creates the file's containing directory first if it doesn't already exist.
      *
      * @param tasks Tasks to persist.
      * @throws IOException If the directory or file could not be written to.
      */
-    public static void save(List<Task> tasks) throws IOException {
-        Files.createDirectories(FILE_PATH.getParent());
+    public void save(List<Task> tasks) throws IOException {
+        Path parent = filePath.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
         StringBuilder content = new StringBuilder();
         for (Task task : tasks) {
             content.append(task.toSaveFormat()).append(System.lineSeparator());
         }
-        Files.writeString(FILE_PATH, content.toString());
+        Files.writeString(filePath, content.toString());
     }
 
     /**
@@ -39,12 +51,12 @@ public class Storage {
      * @return Tasks read from disk.
      * @throws IOException If the file exists but could not be read.
      */
-    public static ArrayList<Task> load() throws IOException {
+    public ArrayList<Task> load() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();
-        if (!Files.exists(FILE_PATH)) {
+        if (!Files.exists(filePath)) {
             return tasks;
         }
-        List<String> lines = Files.readAllLines(FILE_PATH);
+        List<String> lines = Files.readAllLines(filePath);
         for (int lineNumber = 1; lineNumber <= lines.size(); lineNumber++) {
             String line = lines.get(lineNumber - 1);
             if (line.isBlank()) {
@@ -69,7 +81,7 @@ public class Storage {
      * @throws CorruptedSaveDataException If the line doesn't have enough fields, has an
      *                                     unrecognized task type, or an invalid done flag.
      */
-    private static Task parseTask(String line) throws CorruptedSaveDataException {
+    private Task parseTask(String line) throws CorruptedSaveDataException {
         String[] fields = line.split("\\|", -1);
         for (int i = 0; i < fields.length; i++) {
             fields[i] = fields[i].trim();
@@ -119,7 +131,7 @@ public class Storage {
      * @return Parsed date.
      * @throws CorruptedSaveDataException If the text isn't a valid ISO date.
      */
-    private static LocalDate parseSavedDate(String text) throws CorruptedSaveDataException {
+    private LocalDate parseSavedDate(String text) throws CorruptedSaveDataException {
         try {
             return LocalDate.parse(text);
         } catch (DateTimeParseException e) {

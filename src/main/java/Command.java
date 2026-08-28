@@ -1,71 +1,61 @@
+import java.io.IOException;
+
 /**
- * The set of commands Verity recognizes. Each constant knows its own keyword
- * and whether that keyword must match the whole input exactly (no arguments
- * expected, e.g. {@code list}) or only needs to prefix it (arguments follow
- * on the same line, e.g. {@code mark 2}).
+ * Represents a single user command: something that can be executed against
+ * the current task list, reporting through the UI and persisting through
+ * storage.
  */
-public enum Command {
-    LIST("list", false),
-    ON("on", true),
-    TODO("todo", true),
-    DEADLINE("deadline", true),
-    EVENT("event", true),
-    MARK("mark", true),
-    UNMARK("unmark", true),
-    DELETE("delete", true),
-    BYE("bye", false);
+public abstract class Command {
 
-    private final String keyword;
-    private final boolean takesArguments;
+    /**
+     * Executes this command.
+     *
+     * @param tasks Task list to act on.
+     * @param ui UI to report results through.
+     * @param storage Storage to persist any changes through.
+     * @throws VerityException If the command can't be carried out, e.g. an invalid task index.
+     */
+    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws VerityException;
 
-    Command(String keyword, boolean takesArguments) {
-        this.keyword = keyword;
-        this.takesArguments = takesArguments;
+    /**
+     * Returns whether this command should end the program after executing.
+     * Overridden by {@link ExitCommand}; every other command keeps the program running.
+     *
+     * @return {@code true} if the program should exit.
+     */
+    public boolean isExit() {
+        return false;
     }
 
     /**
-     * Returns this command's keyword, e.g. "mark".
+     * Saves the task list to disk, printing a warning instead of failing if it can't be
+     * saved. Shared by every command that mutates the task list.
      *
-     * @return Keyword typed by the user to invoke this command.
+     * @param tasks Task list to save.
+     * @param storage Storage to save through.
+     * @param ui UI to print a warning through, if saving fails.
      */
-    public String getKeyword() {
-        return keyword;
-    }
-
-    /**
-     * Returns the command whose keyword matches the given (already
-     * lowercased) input, or {@code null} if none match.
-     *
-     * @param command Lowercased user input to match against.
-     * @return Matching command, or {@code null} if unrecognized.
-     */
-    public static Command match(String command) {
-        for (Command candidate : values()) {
-            boolean matches = candidate.takesArguments
-                    ? command.startsWith(candidate.keyword)
-                    : command.equals(candidate.keyword);
-            if (matches) {
-                return candidate;
-            }
+    protected void save(TaskList tasks, Storage storage, Ui ui) {
+        try {
+            storage.save(tasks.getTasks());
+        } catch (IOException e) {
+            ui.showSaveWarning(e.getMessage());
         }
-        return null;
     }
 
     /**
-     * Returns a human-readable, comma-separated list of every command's
-     * keyword, e.g. "list, todo, ..., or bye", for use in error messages.
+     * Checks that the given 0-based index refers to an existing task, throwing an error
+     * worded the same way for every command that takes a task index.
      *
-     * @return Description of all recognized commands.
+     * @param tasks Task list to check the index against.
+     * @param index 0-based index to validate.
+     * @throws VerityException If no task exists at that index.
      */
-    public static String describeAll() {
-        Command[] values = values();
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) {
-                result.append(i == values.length - 1 ? ", or " : ", ");
-            }
-            result.append(values[i].keyword);
+    protected void requireValidIndex(TaskList tasks, int index) throws VerityException {
+        if (!tasks.isValidIndex(index)) {
+            String taskWord = tasks.size() == 1 ? "task" : "tasks";
+            throw new VerityException("There is no task " + (index + 1)
+                    + ", you currently only have " + tasks.size() + " " + taskWord + ".");
         }
-        return result.toString();
     }
 }
