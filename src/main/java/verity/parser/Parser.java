@@ -40,25 +40,26 @@ public class Parser {
                     "That's an invalid command! >:[\nTry " + CommandWord.describeAll() + ". :)");
         }
         switch (matched) {
-        case LIST:
-            return new ListCommand();
-        case ON:
-            return new OnCommand(parseOnDate(fullCommand));
-        case UNMARK:
-            return new UnmarkCommand(parseTaskIndex(fullCommand, CommandWord.UNMARK));
-        case MARK:
-            return new MarkCommand(parseTaskIndex(fullCommand, CommandWord.MARK));
-        case DELETE:
-            return new DeleteCommand(parseTaskIndex(fullCommand, CommandWord.DELETE));
-        case TODO:
-            return new AddCommand(parseTodo(fullCommand));
-        case DEADLINE:
-            return new AddCommand(parseDeadline(fullCommand));
-        case EVENT:
-            return new AddCommand(parseEvent(fullCommand));
-        case BYE:
-        default:
-            return new ExitCommand();
+            case LIST:
+                return new ListCommand();
+            case ON:
+                return new OnCommand(parseOnDate(fullCommand));
+            case UNMARK:
+                return new UnmarkCommand(parseTaskIndex(fullCommand, CommandWord.UNMARK));
+            case MARK:
+                return new MarkCommand(parseTaskIndex(fullCommand, CommandWord.MARK));
+            case DELETE:
+                return new DeleteCommand(parseTaskIndex(fullCommand, CommandWord.DELETE));
+            case TODO:
+                return new AddCommand(parseTodo(fullCommand));
+            case DEADLINE:
+                return new AddCommand(parseDeadline(fullCommand));
+            case EVENT:
+                return new AddCommand(parseEvent(fullCommand));
+            case BYE:
+                // Fallthrough
+            default:
+                return new ExitCommand();
         }
     }
 
@@ -94,7 +95,8 @@ public class Parser {
                     "The description of a deadline can't be empty... :( \nTry `deadline <what to do> /by <when>`.");
         }
         if (parts.length < 2) {
-            throw new VerityException("A deadline needs a due date! >:( \nAdd `/by <when>` after the task description.");
+            throw new VerityException(
+                    "A deadline needs a due date! >:( \nAdd `/by <when>` after the task description.");
         }
         String by = parts[1].trim();
         if (by.isEmpty()) {
@@ -150,7 +152,8 @@ public class Parser {
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
-                    "The description of an event can't be empty... :( \nTry `event <what's happening> /from <start> /to <end>`.");
+                    "The description of an event can't be empty... :( \n"
+                            + "Try `event <what's happening> /from <start> /to <end>`.");
         }
         if (parts.length < 2) {
             throw new VerityException("An event needs a start time! :| \nAdd `/from <when>` after the description.");
