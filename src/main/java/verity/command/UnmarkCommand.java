@@ -20,6 +20,14 @@ public class UnmarkCommand extends Command {
         this.index = index;
     }
 
+    /**
+     * Marks the task at this command's index as not done.
+     *
+     * @param tasks {@inheritDoc}
+     * @param ui {@inheritDoc}
+     * @param storage {@inheritDoc}
+     * @throws VerityException If no task exists at the given index.
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VerityException {
         requireValidIndex(tasks, index);

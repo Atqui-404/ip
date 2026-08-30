@@ -54,6 +54,11 @@ public class Verity {
         }
     }
 
+    /**
+     * Entry point of the program: creates Verity backed by the given save file and runs it.
+     *
+     * @param args Command-line arguments; not used.
+     */
     public static void main(String[] args) {
         new Verity("data/verity.txt").run();
     }

@@ -20,6 +20,13 @@ public class AddCommand extends Command {
         this.task = task;
     }
 
+    /**
+     * Adds this command's task to the task list.
+     *
+     * @param tasks {@inheritDoc}
+     * @param ui {@inheritDoc}
+     * @param storage {@inheritDoc}
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         tasks.add(task);

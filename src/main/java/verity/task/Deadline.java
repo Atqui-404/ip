@@ -7,6 +7,7 @@ import java.time.LocalDate;
  */
 public class Deadline extends Task {
 
+    /** Date by which this task should be done. */
     protected LocalDate by;
 
     /**
@@ -29,11 +30,17 @@ public class Deadline extends Task {
         return by;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "[D]" + super.toString() + " (by: " + by.format(DATE_DISPLAY_FORMAT) + ")";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toSaveFormat() {
         return "D | " + super.toSaveFormat() + " | " + by;

@@ -21,6 +21,14 @@ public class DeleteCommand extends Command {
         this.index = index;
     }
 
+    /**
+     * Removes the task at this command's index from the task list.
+     *
+     * @param tasks {@inheritDoc}
+     * @param ui {@inheritDoc}
+     * @param storage {@inheritDoc}
+     * @throws VerityException If no task exists at the given index.
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws VerityException {
         requireValidIndex(tasks, index);
