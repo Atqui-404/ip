@@ -145,6 +145,23 @@ public class Ui {
     }
 
     /**
+     * Prints the tasks whose description matched a search keyword, numbered from 1, or a
+     * "no matches" message if none matched.
+     *
+     * @param matches Matching tasks.
+     */
+    public void showMatchingTasks(List<Task> matches) {
+        if (matches.isEmpty()) {
+            System.out.println("No matching tasks found!");
+            return;
+        }
+        System.out.println("Here are the matching tasks in your list:");
+        for (int i = 0; i < matches.size(); i++) {
+            System.out.println((i + 1) + "." + matches.get(i));
+        }
+    }
+
+    /**
      * Prints a warning that the task list could not be saved to disk.
      *
      * @param reason Reason the save failed.

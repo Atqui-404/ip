@@ -39,6 +39,6 @@ class CommandWordTest {
     void describeAll_listsEveryKeywordSeparatedByCommasEndingWithOr() {
         String description = CommandWord.describeAll();
 
-        assertEquals("list, on, todo, deadline, event, mark, unmark, delete, or bye", description);
+        assertEquals("list, on, find, todo, deadline, event, mark, unmark, delete, or bye", description);
     }
 }

@@ -189,4 +189,53 @@ class TaskListTest {
 
         assertEquals(List.of(matchingDeadline, matchingEvent), matches);
     }
+
+    @Test
+    void findByKeyword_substringInDescription_matched() {
+        TaskList tasks = new TaskList();
+        Todo matching = new Todo("read book");
+        tasks.add(matching);
+        tasks.add(new Todo("write essay"));
+
+        List<Task> matches = tasks.findByKeyword("book");
+
+        assertEquals(List.of(matching), matches);
+    }
+
+    @Test
+    void findByKeyword_differentCase_stillMatched() {
+        TaskList tasks = new TaskList();
+        Todo matching = new Todo("read book");
+        tasks.add(matching);
+
+        List<Task> matches = tasks.findByKeyword("BOOK");
+
+        assertEquals(List.of(matching), matches);
+    }
+
+    @Test
+    void findByKeyword_noDescriptionContainsKeyword_emptyListReturned() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+
+        List<Task> matches = tasks.findByKeyword("zzz");
+
+        assertTrue(matches.isEmpty());
+    }
+
+    @Test
+    void findByKeyword_matchesAcrossAllTaskTypes_allReturnedInOrder() {
+        TaskList tasks = new TaskList();
+        Todo todo = new Todo("read book");
+        Deadline deadline = new Deadline("return book", LocalDate.of(2019, 6, 6));
+        Event event = new Event("book club", LocalDate.of(2019, 8, 6), LocalDate.of(2019, 8, 7));
+        tasks.add(todo);
+        tasks.add(new Todo("write essay"));
+        tasks.add(deadline);
+        tasks.add(event);
+
+        List<Task> matches = tasks.findByKeyword("book");
+
+        assertEquals(List.of(todo, deadline, event), matches);
+    }
 }

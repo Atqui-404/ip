@@ -11,6 +11,8 @@ public enum CommandWord {
     LIST("list", false),
     /** Lists tasks occurring on a given date. */
     ON("on", true),
+    /** Finds tasks whose description contains a given keyword. */
+    FIND("find", true),
     /** Adds a task with no date attached. */
     TODO("todo", true),
     /** Adds a task with a due date. */
