@@ -7,7 +7,9 @@ import java.time.LocalDate;
  */
 public class Event extends Task {
 
+    /** Date this event starts. */
     protected LocalDate from;
+    /** Date this event ends. */
     protected LocalDate to;
 
     /**
@@ -41,12 +43,18 @@ public class Event extends Task {
         return to;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return "[E]" + super.toString() + " (from: " + from.format(DATE_DISPLAY_FORMAT)
                 + " to: " + to.format(DATE_DISPLAY_FORMAT) + ")";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toSaveFormat() {
         return "E | " + super.toSaveFormat() + " | " + from + " | " + to;

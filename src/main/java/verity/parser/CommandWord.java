@@ -7,14 +7,23 @@ package verity.parser;
  * (arguments follow on the same line, e.g. {@code mark 2}).
  */
 public enum CommandWord {
+    /** Lists every task in the task list. */
     LIST("list", false),
+    /** Lists tasks occurring on a given date. */
     ON("on", true),
+    /** Adds a task with no date attached. */
     TODO("todo", true),
+    /** Adds a task with a due date. */
     DEADLINE("deadline", true),
+    /** Adds a task with a start and end date. */
     EVENT("event", true),
+    /** Marks a task as done. */
     MARK("mark", true),
+    /** Marks a task as not done. */
     UNMARK("unmark", true),
+    /** Removes a task from the task list. */
     DELETE("delete", true),
+    /** Ends the program. */
     BYE("bye", false);
 
     private final String keyword;

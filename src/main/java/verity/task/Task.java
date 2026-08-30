@@ -10,7 +10,9 @@ public class Task {
     /** Format dates are shown to the user in, e.g. "Oct 15 2019". */
     public static final DateTimeFormatter DATE_DISPLAY_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy");
 
+    /** Description of this task. */
     protected String description;
+    /** Whether this task has been marked as done. */
     protected boolean isDone;
 
     /**

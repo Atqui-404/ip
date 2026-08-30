@@ -21,6 +21,13 @@ public class OnCommand extends Command {
         this.date = date;
     }
 
+    /**
+     * Lists every deadline due, or event spanning, this command's date.
+     *
+     * @param tasks {@inheritDoc}
+     * @param ui {@inheritDoc}
+     * @param storage {@inheritDoc}
+     */
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         ui.showTasksOnDate(tasks.getTasksOnDate(date), date);
