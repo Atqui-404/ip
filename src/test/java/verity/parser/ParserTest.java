@@ -16,6 +16,7 @@ import verity.command.AddCommand;
 import verity.command.Command;
 import verity.command.DeleteCommand;
 import verity.command.ExitCommand;
+import verity.command.FindCommand;
 import verity.command.ListCommand;
 import verity.command.MarkCommand;
 import verity.command.OnCommand;
@@ -162,6 +163,27 @@ class ParserTest {
     @Test
     void parse_onInvalidDate_exceptionThrown() {
         assertThrows(VerityException.class, () -> Parser.parse("on someday"));
+    }
+
+    // ---- find ----
+
+    @Test
+    void parse_validFind_returnsFindCommandThatFiltersMatchingTasks() throws VerityException, IOException {
+        TaskList tasks = new TaskList();
+        Parser.parse("todo read book").execute(tasks, ui, newStorage());
+        Parser.parse("todo write essay").execute(tasks, ui, newStorage());
+
+        Command findCommand = Parser.parse("find book");
+        assertInstanceOf(FindCommand.class, findCommand);
+        // Executing it must not throw, and must not mutate the task list.
+        findCommand.execute(tasks, ui, newStorage());
+
+        assertEquals(2, tasks.size());
+    }
+
+    @Test
+    void parse_findMissingKeyword_exceptionThrown() {
+        assertThrows(VerityException.class, () -> Parser.parse("find"));
     }
 
     // ---- mark / unmark / delete ----

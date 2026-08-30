@@ -113,6 +113,23 @@ public class TaskList {
     }
 
     /**
+     * Returns every task whose description contains the given keyword (case-insensitive).
+     *
+     * @param keyword Keyword to search for.
+     * @return Matching tasks, in list order.
+     */
+    public List<Task> findByKeyword(String keyword) {
+        String lowerKeyword = keyword.toLowerCase();
+        List<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase().contains(lowerKeyword)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
+    /**
      * Returns whether the given task falls on the given date: a {@link Deadline} matches if
      * its due date equals {@code date}; an {@link Event} matches if {@code date} falls within
      * its start and end date (inclusive). A {@link Todo} never matches, since it has no date.

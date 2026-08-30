@@ -239,3 +239,30 @@ Notes:
 |---|---|
 | `on` | `ERROR!!! >.<\nTell me which date to look up!` |
 | `on someday` | `ERROR!!! >.<\nThe date after `on` must be in yyyy-MM-dd format` |
+
+## TC12: `find` lists tasks whose description matches a keyword
+**Aim:** Level-9: `find <keyword>` lists every task (of any type) whose description contains the keyword, case-insensitively, matching the spec's own example.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `mark 1` | `Nice! I've marked this task as done:` |
+| `deadline return book /by 2019-06-06` | `Got it. I've added this task:` |
+| `todo write essay` | `Got it. I've added this task:` |
+| `find book` | `Here are the matching tasks in your list:\n1.[T][X] read book\n2.[D][ ] return book (by: Jun 06 2019)` |
+| `find BOOK` | `Here are the matching tasks in your list:\n1.[T][X] read book\n2.[D][ ] return book (by: Jun 06 2019)` |
+
+## TC12b: `find` with no matches
+**Aim:** Level-9: searching for a keyword nothing matches should say so, not print an empty list.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `find zzz` | `No matching tasks found!` |
+
+## TC12c: `find` error handling
+**Aim:** Level-9: `find` with no keyword must be rejected, like the other commands that require an argument.
+
+| Input | Expected Output |
+|---|---|
+| `find` | `ERROR!!! >.<\nTell me what to search for!` |

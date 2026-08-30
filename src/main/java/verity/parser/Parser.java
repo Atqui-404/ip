@@ -8,6 +8,7 @@ import verity.command.AddCommand;
 import verity.command.Command;
 import verity.command.DeleteCommand;
 import verity.command.ExitCommand;
+import verity.command.FindCommand;
 import verity.command.ListCommand;
 import verity.command.MarkCommand;
 import verity.command.OnCommand;
@@ -44,6 +45,8 @@ public class Parser {
             return new ListCommand();
         case ON:
             return new OnCommand(parseOnDate(fullCommand));
+        case FIND:
+            return new FindCommand(parseFindKeyword(fullCommand));
         case UNMARK:
             return new UnmarkCommand(parseTaskIndex(fullCommand, CommandWord.UNMARK));
         case MARK:
@@ -133,6 +136,21 @@ public class Parser {
             throw new VerityException("Tell me which date to look up! Try `on <yyyy-MM-dd>`, e.g. `on 2019-10-15`.");
         }
         return parseDate(text, "on");
+    }
+
+    /**
+     * Parses a {@code find} command into the keyword to search for.
+     *
+     * @param input Full line of user input, starting with "find".
+     * @return Keyword to search task descriptions for.
+     * @throws VerityException If no keyword is given.
+     */
+    private static String parseFindKeyword(String input) throws VerityException {
+        String keyword = input.substring("find".length()).trim();
+        if (keyword.isEmpty()) {
+            throw new VerityException("Tell me what to search for! Try `find <keyword>`, e.g. `find book`.");
+        }
+        return keyword;
     }
 
     /**

@@ -9,6 +9,7 @@ package verity.parser;
 public enum CommandWord {
     LIST("list", false),
     ON("on", true),
+    FIND("find", true),
     TODO("todo", true),
     DEADLINE("deadline", true),
     EVENT("event", true),
