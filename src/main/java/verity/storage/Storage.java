@@ -106,23 +106,23 @@ public class Storage {
 
         Task task;
         switch (type) {
-        case "T":
-            task = new Todo(description);
-            break;
-        case "D":
-            if (fields.length < 4) {
-                throw new CorruptedSaveDataException("deadline is missing its due-date field");
-            }
-            task = new Deadline(description, parseSavedDate(fields[3]));
-            break;
-        case "E":
-            if (fields.length < 5) {
-                throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
-            }
-            task = new Event(description, parseSavedDate(fields[3]), parseSavedDate(fields[4]));
-            break;
-        default:
-            throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
+            case "T":
+                task = new Todo(description);
+                break;
+            case "D":
+                if (fields.length < 4) {
+                    throw new CorruptedSaveDataException("deadline is missing its due-date field");
+                }
+                task = new Deadline(description, parseSavedDate(fields[3]));
+                break;
+            case "E":
+                if (fields.length < 5) {
+                    throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
+                }
+                task = new Event(description, parseSavedDate(fields[3]), parseSavedDate(fields[4]));
+                break;
+            default:
+                throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
         }
         if (isDone) {
             task.markAsDone();
