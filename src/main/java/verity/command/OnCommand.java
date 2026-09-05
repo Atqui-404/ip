@@ -1,10 +1,11 @@
 package verity.command;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import verity.storage.Storage;
+import verity.task.Task;
 import verity.task.TaskList;
-import verity.ui.Ui;
 
 /**
  * Lists every deadline due, or event spanning, a given date.
@@ -25,11 +26,16 @@ public class OnCommand extends Command {
      * Lists every deadline due, or event spanning, this command's date.
      *
      * @param tasks {@inheritDoc}
-     * @param ui {@inheritDoc}
      * @param storage {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showTasksOnDate(tasks.getTasksOnDate(date), date);
+    public String execute(TaskList tasks, Storage storage) {
+        List<Task> matches = tasks.getTasksOnDate(date);
+        String formattedDate = date.format(Task.DATE_DISPLAY_FORMAT);
+        if (matches.isEmpty()) {
+            return "You have no tasks on " + formattedDate + "!";
+        }
+        return "You have " + matches.size() + " tasks on " + formattedDate + "!\n" + formatNumberedList(matches);
     }
 }

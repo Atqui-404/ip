@@ -1,10 +1,6 @@
 package verity.ui;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Scanner;
-
-import verity.task.Task;
 
 /**
  * Handles all interaction with the user: printing messages to the console
@@ -59,115 +55,12 @@ public class Ui {
     }
 
     /**
-     * Prints the farewell message shown when the user exits.
-     */
-    public void showGoodbye() {
-        System.out.println("Bye! See you soon! ;)");
-    }
-
-    /**
-     * Prints the confirmation shown after a task is added.
+     * Prints a command's response.
      *
-     * @param task Task that was added.
-     * @param totalCount Total number of tasks after adding it.
+     * @param response Response to print.
      */
-    public void showTaskAdded(Task task, int totalCount) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println("  " + task);
-        System.out.println("Now you have " + totalCount + " tasks in the list.");
-    }
-
-    /**
-     * Prints the confirmation shown after a task is marked as done.
-     *
-     * @param task Task that was marked.
-     */
-    public void showTaskMarked(Task task) {
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println("  " + task);
-    }
-
-    /**
-     * Prints the confirmation shown after a task is marked as not done.
-     *
-     * @param task Task that was unmarked.
-     */
-    public void showTaskUnmarked(Task task) {
-        System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println("  " + task);
-    }
-
-    /**
-     * Prints the confirmation shown after a task is deleted.
-     *
-     * @param task Task that was removed.
-     * @param totalCount Total number of tasks remaining after removing it.
-     */
-    public void showTaskDeleted(Task task, int totalCount) {
-        System.out.println("Noted. I've removed this task:");
-        System.out.println("  " + task);
-        System.out.println("Now you have " + totalCount + " tasks in the list.");
-    }
-
-    /**
-     * Prints the full task list, numbered from 1, or a "no tasks" message if it's empty.
-     *
-     * @param tasks Tasks to print.
-     */
-    public void showTaskList(List<Task> tasks) {
-        if (tasks.isEmpty()) {
-            System.out.println("You have no tasks!");
-            return;
-        }
-        System.out.printf("You have %d tasks!\n", tasks.size());
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
-        }
-    }
-
-    /**
-     * Prints the tasks occurring on a given date, numbered from 1, or a "no tasks"
-     * message if none match.
-     *
-     * @param matches Tasks occurring on {@code date}.
-     * @param date Date they were filtered by.
-     */
-    public void showTasksOnDate(List<Task> matches, LocalDate date) {
-        String formattedDate = date.format(Task.DATE_DISPLAY_FORMAT);
-        if (matches.isEmpty()) {
-            System.out.println("You have no tasks on " + formattedDate + "!");
-            return;
-        }
-        System.out.printf("You have %d tasks on %s!\n", matches.size(), formattedDate);
-        for (int i = 0; i < matches.size(); i++) {
-            System.out.println((i + 1) + "." + matches.get(i));
-        }
-    }
-
-    /**
-     * Prints the tasks whose description matched a search keyword, numbered from 1, or a
-     * "no matches" message if none matched.
-     *
-     * @param matches Matching tasks.
-     */
-    public void showMatchingTasks(List<Task> matches) {
-        if (matches.isEmpty()) {
-            System.out.println("No matching tasks found!");
-            return;
-        }
-        System.out.println("Here are the matching tasks in your list:");
-        for (int i = 0; i < matches.size(); i++) {
-            System.out.println((i + 1) + "." + matches.get(i));
-        }
-    }
-
-    /**
-     * Prints a warning that the task list could not be saved to disk.
-     *
-     * @param reason Reason the save failed.
-     */
-    public void showSaveWarning(String reason) {
-        System.out.println("Warning: could not save tasks to disk (" + reason + ")");
+    public void showResponse(String response) {
+        System.out.println(response);
     }
 
     /**

@@ -1,16 +1,17 @@
 package verity.command;
 
 import java.io.IOException;
+import java.util.List;
 
 import verity.VerityException;
 import verity.storage.Storage;
+import verity.task.Task;
 import verity.task.TaskList;
-import verity.ui.Ui;
 
 /**
  * Represents a single user command: something that can be executed against
- * the current task list, reporting through the UI and persisting through
- * storage.
+ * the current task list, returning a response to show the user and
+ * persisting any changes through storage.
  */
 public abstract class Command {
 
@@ -18,11 +19,11 @@ public abstract class Command {
      * Executes this command.
      *
      * @param tasks Task list to act on.
-     * @param ui UI to report results through.
      * @param storage Storage to persist any changes through.
+     * @return Response to show the user.
      * @throws VerityException If the command can't be carried out, e.g. an invalid task index.
      */
-    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws VerityException;
+    public abstract String execute(TaskList tasks, Storage storage) throws VerityException;
 
     /**
      * Returns whether this command should end the program after executing.
@@ -35,18 +36,20 @@ public abstract class Command {
     }
 
     /**
-     * Saves the task list to disk, printing a warning instead of failing if it can't be
-     * saved. Shared by every command that mutates the task list.
+     * Saves the task list to disk, returning a warning to append to the response instead of
+     * failing if it can't be saved. Shared by every command that mutates the task list.
      *
      * @param tasks Task list to save.
      * @param storage Storage to save through.
-     * @param ui UI to print a warning through, if saving fails.
+     * @return A warning message to append to the response if saving failed, or an empty
+     *         string if it succeeded.
      */
-    protected void save(TaskList tasks, Storage storage, Ui ui) {
+    protected String save(TaskList tasks, Storage storage) {
         try {
             storage.save(tasks.getTasks());
+            return "";
         } catch (IOException e) {
-            ui.showSaveWarning(e.getMessage());
+            return "\nWarning: could not save tasks to disk (" + e.getMessage() + ")";
         }
     }
 
@@ -64,5 +67,22 @@ public abstract class Command {
             throw new VerityException("There is no task " + (index + 1)
                     + ", you currently only have " + tasks.size() + " " + taskWord + ".");
         }
+    }
+
+    /**
+     * Returns the given tasks numbered from 1, one per line.
+     *
+     * @param tasks Tasks to format.
+     * @return Numbered, newline-separated listing of the tasks.
+     */
+    protected String formatNumberedList(List<Task> tasks) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < tasks.size(); i++) {
+            if (i > 0) {
+                result.append("\n");
+            }
+            result.append(i + 1).append(".").append(tasks.get(i));
+        }
+        return result.toString();
     }
 }

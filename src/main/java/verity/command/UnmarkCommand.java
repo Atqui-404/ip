@@ -3,7 +3,6 @@ package verity.command;
 import verity.VerityException;
 import verity.storage.Storage;
 import verity.task.TaskList;
-import verity.ui.Ui;
 
 /**
  * Marks a task as not done.
@@ -24,15 +23,15 @@ public class UnmarkCommand extends Command {
      * Marks the task at this command's index as not done.
      *
      * @param tasks {@inheritDoc}
-     * @param ui {@inheritDoc}
      * @param storage {@inheritDoc}
+     * @return {@inheritDoc}
      * @throws VerityException If no task exists at the given index.
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) throws VerityException {
+    public String execute(TaskList tasks, Storage storage) throws VerityException {
         requireValidIndex(tasks, index);
         tasks.get(index).markAsNotDone();
-        ui.showTaskUnmarked(tasks.get(index));
-        save(tasks, storage, ui);
+        String response = "OK, I've marked this task as not done yet:\n  " + tasks.get(index);
+        return response + save(tasks, storage);
     }
 }

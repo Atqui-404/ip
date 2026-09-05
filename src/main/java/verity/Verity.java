@@ -16,6 +16,7 @@ public class Verity {
     private final Ui ui;
     private final Storage storage;
     private TaskList tasks;
+    private boolean isExit = false;
 
     /**
      * Creates Verity, loading any previously saved tasks from the given file.
@@ -38,20 +39,43 @@ public class Verity {
      */
     public void run() {
         ui.showWelcome();
-        boolean isExit = false;
         while (!isExit) {
             try {
                 String fullCommand = ui.readCommand();
                 ui.showLine();
-                Command command = Parser.parse(fullCommand);
-                command.execute(tasks, ui, storage);
-                isExit = command.isExit();
-            } catch (VerityException e) {
-                ui.showError(e.getMessage());
+                ui.showResponse(getResponse(fullCommand));
             } finally {
                 ui.showLine();
             }
         }
+    }
+
+    /**
+     * Parses and executes a single line of input, for use by a GUI (or any caller that wants
+     * one command's response as a string rather than driving the read-parse-execute loop).
+     * Check {@link #isExit()} afterwards to know whether the user asked to exit.
+     *
+     * @param input Full line of user input.
+     * @return Response to show the user.
+     */
+    public String getResponse(String input) {
+        try {
+            Command command = Parser.parse(input);
+            String response = command.execute(tasks, storage);
+            isExit = command.isExit();
+            return response;
+        } catch (VerityException e) {
+            return "ERROR!!! >.<\n" + e.getMessage();
+        }
+    }
+
+    /**
+     * Returns whether the most recently executed command was an exit command.
+     *
+     * @return {@code true} if the user asked to exit.
+     */
+    public boolean isExit() {
+        return isExit;
     }
 
     /**
