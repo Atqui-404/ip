@@ -84,8 +84,9 @@ class ParserTest {
 
     @Test
     void parse_deadlineInvalidDateFormat_exceptionThrown() {
-        VerityException e = assertThrows(VerityException.class,
-                () -> Parser.parse("deadline return book /by tomorrow"));
+        String input = "deadline return book /by tomorrow";
+
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(input));
 
         assertTrue(e.getMessage().contains("yyyy-MM-dd"));
     }

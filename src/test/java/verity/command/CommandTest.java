@@ -28,14 +28,17 @@ class CommandTest {
 
     private final Ui ui = new Ui();
 
+    private Storage newStorage() {
+        return new Storage(tempDir.resolve("verity.txt").toString());
+    }
+
     @Test
     void requireValidIndex_singleTaskInList_errorUsesSingularTaskWord() {
         TaskList tasks = new TaskList();
         tasks.add(new Todo("read book"));
         Command command = new MarkCommand(5);
 
-        VerityException e = assertThrows(VerityException.class,
-                () -> command.execute(tasks, ui, new Storage(tempDir.resolve("verity.txt").toString())));
+        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, ui, newStorage()));
 
         assertEquals("There is no task 6, you currently only have 1 task.", e.getMessage());
     }
@@ -47,8 +50,7 @@ class CommandTest {
         tasks.add(new Todo("write essay"));
         Command command = new DeleteCommand(5);
 
-        VerityException e = assertThrows(VerityException.class,
-                () -> command.execute(tasks, ui, new Storage(tempDir.resolve("verity.txt").toString())));
+        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, ui, newStorage()));
 
         assertEquals("There is no task 6, you currently only have 2 tasks.", e.getMessage());
     }
@@ -58,8 +60,7 @@ class CommandTest {
         TaskList tasks = new TaskList();
         Command command = new UnmarkCommand(0);
 
-        VerityException e = assertThrows(VerityException.class,
-                () -> command.execute(tasks, ui, new Storage(tempDir.resolve("verity.txt").toString())));
+        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, ui, newStorage()));
 
         assertEquals("There is no task 1, you currently only have 0 tasks.", e.getMessage());
     }
