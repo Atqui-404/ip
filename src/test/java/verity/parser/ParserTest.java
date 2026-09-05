@@ -23,14 +23,11 @@ import verity.command.OnCommand;
 import verity.command.UnmarkCommand;
 import verity.storage.Storage;
 import verity.task.TaskList;
-import verity.ui.Ui;
 
 class ParserTest {
 
     @TempDir
     Path tempDir;
-
-    private final Ui ui = new Ui();
 
     private Storage newStorage() {
         return new Storage(tempDir.resolve("verity.txt").toString());
@@ -44,7 +41,7 @@ class ParserTest {
         assertInstanceOf(AddCommand.class, command);
 
         TaskList tasks = new TaskList();
-        command.execute(tasks, ui, newStorage());
+        command.execute(tasks, newStorage());
 
         assertEquals(1, tasks.size());
         assertEquals("[T][ ] read book", tasks.get(0).toString());
@@ -62,7 +59,7 @@ class ParserTest {
         Command command = Parser.parse("deadline return book /by 2019-10-15");
 
         TaskList tasks = new TaskList();
-        command.execute(tasks, ui, newStorage());
+        command.execute(tasks, newStorage());
 
         assertEquals("[D][ ] return book (by: Oct 15 2019)", tasks.get(0).toString());
     }
@@ -96,7 +93,7 @@ class ParserTest {
         Command command = Parser.parse("deadline return book /BY 2019-10-15");
 
         TaskList tasks = new TaskList();
-        command.execute(tasks, ui, newStorage());
+        command.execute(tasks, newStorage());
 
         assertEquals("[D][ ] return book (by: Oct 15 2019)", tasks.get(0).toString());
     }
@@ -108,7 +105,7 @@ class ParserTest {
         Command command = Parser.parse("event project meeting /from 2019-08-06 /to 2019-08-07");
 
         TaskList tasks = new TaskList();
-        command.execute(tasks, ui, newStorage());
+        command.execute(tasks, newStorage());
 
         assertEquals("[E][ ] project meeting (from: Aug 06 2019 to: Aug 07 2019)", tasks.get(0).toString());
     }
@@ -145,13 +142,13 @@ class ParserTest {
     @Test
     void parse_validOnDate_returnsOnCommandThatFiltersMatchingTasks() throws VerityException, IOException {
         TaskList tasks = new TaskList();
-        Parser.parse("deadline return book /by 2019-12-02").execute(tasks, ui, newStorage());
-        Parser.parse("deadline other /by 2019-12-25").execute(tasks, ui, newStorage());
+        Parser.parse("deadline return book /by 2019-12-02").execute(tasks, newStorage());
+        Parser.parse("deadline other /by 2019-12-25").execute(tasks, newStorage());
 
         Command onCommand = Parser.parse("on 2019-12-02");
         assertInstanceOf(OnCommand.class, onCommand);
         // Executing it must not throw, and must not mutate the task list.
-        onCommand.execute(tasks, ui, newStorage());
+        onCommand.execute(tasks, newStorage());
 
         assertEquals(2, tasks.size());
     }
@@ -171,13 +168,13 @@ class ParserTest {
     @Test
     void parse_validFind_returnsFindCommandThatFiltersMatchingTasks() throws VerityException, IOException {
         TaskList tasks = new TaskList();
-        Parser.parse("todo read book").execute(tasks, ui, newStorage());
-        Parser.parse("todo write essay").execute(tasks, ui, newStorage());
+        Parser.parse("todo read book").execute(tasks, newStorage());
+        Parser.parse("todo write essay").execute(tasks, newStorage());
 
         Command findCommand = Parser.parse("find book");
         assertInstanceOf(FindCommand.class, findCommand);
         // Executing it must not throw, and must not mutate the task list.
-        findCommand.execute(tasks, ui, newStorage());
+        findCommand.execute(tasks, newStorage());
 
         assertEquals(2, tasks.size());
     }
@@ -192,11 +189,11 @@ class ParserTest {
     @Test
     void parse_validMark_marksTaskAsDone() throws VerityException, IOException {
         TaskList tasks = new TaskList();
-        Parser.parse("todo read book").execute(tasks, ui, newStorage());
+        Parser.parse("todo read book").execute(tasks, newStorage());
 
         Command markCommand = Parser.parse("mark 1");
         assertInstanceOf(MarkCommand.class, markCommand);
-        markCommand.execute(tasks, ui, newStorage());
+        markCommand.execute(tasks, newStorage());
 
         assertEquals("[T][X] read book", tasks.get(0).toString());
     }
@@ -204,12 +201,12 @@ class ParserTest {
     @Test
     void parse_validUnmark_marksTaskAsNotDone() throws VerityException, IOException {
         TaskList tasks = new TaskList();
-        Parser.parse("todo read book").execute(tasks, ui, newStorage());
-        Parser.parse("mark 1").execute(tasks, ui, newStorage());
+        Parser.parse("todo read book").execute(tasks, newStorage());
+        Parser.parse("mark 1").execute(tasks, newStorage());
 
         Command unmarkCommand = Parser.parse("unmark 1");
         assertInstanceOf(UnmarkCommand.class, unmarkCommand);
-        unmarkCommand.execute(tasks, ui, newStorage());
+        unmarkCommand.execute(tasks, newStorage());
 
         assertEquals("[T][ ] read book", tasks.get(0).toString());
     }
@@ -217,11 +214,11 @@ class ParserTest {
     @Test
     void parse_validDelete_removesTask() throws VerityException, IOException {
         TaskList tasks = new TaskList();
-        Parser.parse("todo read book").execute(tasks, ui, newStorage());
+        Parser.parse("todo read book").execute(tasks, newStorage());
 
         Command deleteCommand = Parser.parse("delete 1");
         assertInstanceOf(DeleteCommand.class, deleteCommand);
-        deleteCommand.execute(tasks, ui, newStorage());
+        deleteCommand.execute(tasks, newStorage());
 
         assertTrue(tasks.isEmpty());
     }
@@ -243,7 +240,7 @@ class ParserTest {
         Command markCommand = Parser.parse("mark 5");
 
         TaskList tasks = new TaskList();
-        VerityException e = assertThrows(VerityException.class, () -> markCommand.execute(tasks, ui, newStorage()));
+        VerityException e = assertThrows(VerityException.class, () -> markCommand.execute(tasks, newStorage()));
         assertTrue(e.getMessage().contains("no task 5"));
     }
 

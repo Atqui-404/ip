@@ -1,8 +1,10 @@
 package verity.command;
 
+import java.util.List;
+
 import verity.storage.Storage;
+import verity.task.Task;
 import verity.task.TaskList;
-import verity.ui.Ui;
 
 /**
  * Lists every task whose description contains a given keyword.
@@ -23,11 +25,15 @@ public class FindCommand extends Command {
      * Lists every task whose description contains this command's keyword.
      *
      * @param tasks {@inheritDoc}
-     * @param ui {@inheritDoc}
      * @param storage {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
-        ui.showMatchingTasks(tasks.findByKeyword(keyword));
+    public String execute(TaskList tasks, Storage storage) {
+        List<Task> matches = tasks.findByKeyword(keyword);
+        if (matches.isEmpty()) {
+            return "No matching tasks found!";
+        }
+        return "Here are the matching tasks in your list:\n" + formatNumberedList(matches);
     }
 }

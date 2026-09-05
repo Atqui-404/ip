@@ -1,14 +1,11 @@
 package verity.command;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -19,14 +16,11 @@ import verity.VerityException;
 import verity.storage.Storage;
 import verity.task.TaskList;
 import verity.task.Todo;
-import verity.ui.Ui;
 
 class CommandTest {
 
     @TempDir
     Path tempDir;
-
-    private final Ui ui = new Ui();
 
     private Storage newStorage() {
         return new Storage(tempDir.resolve("verity.txt").toString());
@@ -38,7 +32,7 @@ class CommandTest {
         tasks.add(new Todo("read book"));
         Command command = new MarkCommand(5);
 
-        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, ui, newStorage()));
+        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, newStorage()));
 
         assertEquals("There is no task 6, you currently only have 1 task.", e.getMessage());
     }
@@ -50,7 +44,7 @@ class CommandTest {
         tasks.add(new Todo("write essay"));
         Command command = new DeleteCommand(5);
 
-        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, ui, newStorage()));
+        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, newStorage()));
 
         assertEquals("There is no task 6, you currently only have 2 tasks.", e.getMessage());
     }
@@ -60,13 +54,13 @@ class CommandTest {
         TaskList tasks = new TaskList();
         Command command = new UnmarkCommand(0);
 
-        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, ui, newStorage()));
+        VerityException e = assertThrows(VerityException.class, () -> command.execute(tasks, newStorage()));
 
         assertEquals("There is no task 1, you currently only have 0 tasks.", e.getMessage());
     }
 
     @Test
-    void execute_saveFails_warningPrintedButNoExceptionPropagates() throws IOException, VerityException {
+    void execute_saveFails_warningAppendedButNoExceptionPropagates() throws IOException, VerityException {
         // Force IOException: the save file's parent path already exists as a regular
         // file, so Files.createDirectories() inside Storage.save() cannot create it.
         Path blocker = tempDir.resolve("blocker");
@@ -75,10 +69,10 @@ class CommandTest {
         TaskList tasks = new TaskList();
         Command command = new AddCommand(new Todo("read book"));
 
-        String output = captureStdout(() -> command.execute(tasks, ui, storage));
+        String response = command.execute(tasks, storage);
 
         assertEquals(1, tasks.size(), "the in-memory task list must still be updated even if saving fails");
-        assertTrue(output.contains("Warning: could not save tasks to disk"));
+        assertTrue(response.contains("Warning: could not save tasks to disk"));
     }
 
     @Test
@@ -96,28 +90,19 @@ class CommandTest {
     }
 
     @Test
-    void listCommand_execute_doesNotThrowOnEmptyOrNonEmptyList() {
-        assertDoesNotThrow(() -> new ListCommand().execute(new TaskList(), ui, null));
+    void listCommand_emptyList_noTasksMessage() {
+        String response = new ListCommand().execute(new TaskList(), null);
 
+        assertEquals("You have no tasks!", response);
+    }
+
+    @Test
+    void listCommand_nonEmptyList_numberedListReturned() {
         TaskList tasks = new TaskList();
         tasks.add(new Todo("read book"));
-        assertDoesNotThrow(() -> new ListCommand().execute(tasks, ui, null));
-    }
 
-    private static String captureStdout(ThrowingRunnable action) throws VerityException {
-        PrintStream original = System.out;
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(buffer));
-        try {
-            action.run();
-        } finally {
-            System.setOut(original);
-        }
-        return buffer.toString();
-    }
+        String response = new ListCommand().execute(tasks, null);
 
-    @FunctionalInterface
-    private interface ThrowingRunnable {
-        void run() throws VerityException;
+        assertEquals("You have 1 tasks!\n1.[T][ ] read book", response);
     }
 }
