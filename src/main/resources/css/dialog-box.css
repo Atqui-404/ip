@@ -1,0 +1,19 @@
+.label {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #4a4a4a #000000 #000000 #4a4a4a;
+    -fx-border-width: 3px;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-font-family: "Monocraft";
+    -fx-text-fill: #f0f0f0;
+}
+
+.reply-label {
+    -fx-background-color: #f5c518;
+    -fx-border-color: #fff2b0 #8a6d00 #8a6d00 #fff2b0;
+    -fx-text-fill: #2b2200;
+}
+
+#displayPicture {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 6, 0.4, 3, 3);
+}

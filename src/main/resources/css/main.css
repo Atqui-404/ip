@@ -1,0 +1,64 @@
+@font-face {
+    font-family: "Monocraft";
+    src: url("../fonts/Monocraft.ttf");
+}
+
+.root {
+    -fx-background-color: #7a6a4f;
+    -fx-background-image: url("../images/background.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+    -fx-font-family: "Monocraft";
+}
+
+.text-field {
+    -fx-background-color: rgba(20, 20, 20, 0.75);
+    -fx-text-fill: white;
+    -fx-font-family: "Monocraft";
+    -fx-font-size: 16px;
+    -fx-background-radius: 0;
+    -fx-border-color: #2b2b2b;
+    -fx-border-width: 2px;
+    -fx-prompt-text-fill: #aaaaaa;
+}
+
+.button {
+    -fx-background-color: #8a8a8a;
+    -fx-background-radius: 0;
+    -fx-border-width: 3px;
+    -fx-border-color: #d9d9d9 #4a4a4a #4a4a4a #d9d9d9;
+    -fx-font-family: "Monocraft";
+    -fx-font-weight: bold;
+    -fx-text-fill: #2b2b2b;
+}
+
+.button:hover {
+    -fx-background-color: #9a9a9a;
+}
+
+.button:pressed {
+    -fx-border-color: #4a4a4a #d9d9d9 #d9d9d9 #4a4a4a;
+    -fx-background-color: #6a6a6a;
+}
+
+.scroll-pane,
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #5a4a35;
+    -fx-background-radius: 0;
+    -fx-border-color: #d9d9d9 #2b2b2b #2b2b2b #d9d9d9;
+    -fx-border-width: 2px;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
