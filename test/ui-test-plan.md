@@ -266,3 +266,63 @@ Notes:
 | Input | Expected Output |
 |---|---|
 | `find` | `ERROR!!! >.<\nTell me what to search for!` |
+
+## TC13: `undo` with nothing to undo
+**Aim:** C-Undo: running `undo` with an empty history (fresh session) must say so, not error or silently do nothing.
+
+| Input | Expected Output |
+|---|---|
+| `undo` | `Nothing to undo!` |
+
+## TC13b: `undo` reverses the most recent `todo`/`deadline`/`event`
+**Aim:** C-Undo: adding a task and immediately undoing it must remove that exact task and leave the list as it was before.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:\n  [T][ ] read book` |
+| `undo` | `OK, I've undone adding this task:\n  [T][ ] read book\nNow you have 0 tasks in the list.` |
+| `list` | `You have no tasks!` |
+
+## TC13c: `undo` reverses a `delete`, restoring the task at its original position
+**Aim:** C-Undo: undoing a delete must re-insert the task where it was, not just append it back at the end - proves the restore is a real positional insert.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `todo write essay` | `Got it. I've added this task:` |
+| `todo return book` | `Got it. I've added this task:` |
+| `delete 2` | `Noted. I've removed this task:\n  [T][ ] write essay` |
+| `undo` | `OK, I've undone removing this task:\n  [T][ ] write essay` |
+| `list` | `1.[T][ ] read book\n2.[T][ ] write essay\n3.[T][ ] return book` |
+
+## TC13d: `undo` reverses a `mark` and an `unmark`
+**Aim:** C-Undo: undoing a mark must unmark the task again, and undoing an unmark must re-mark it - both directions of the same toggle.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `mark 1` | `Nice! I've marked this task as done:\n  [T][X] read book` |
+| `undo` | `OK, I've undone marking this task as done:\n  [T][ ] read book` |
+| `mark 1` | `Nice! I've marked this task as done:\n  [T][X] read book` |
+| `unmark 1` | `OK, I've marked this task as not done yet:\n  [T][ ] read book` |
+| `undo` | `OK, I've undone marking this task as not done:\n  [T][X] read book` |
+
+## TC13e: non-mutating commands don't clear undo history
+**Aim:** C-Undo: `list`/`find` between an undoable command and `undo` must not consume or clear the history, since they don't change the task list.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `list` | `1.[T][ ] read book` |
+| `find book` | `Here are the matching tasks in your list:\n1.[T][ ] read book` |
+| `undo` | `OK, I've undone adding this task:\n  [T][ ] read book` |
+| `list` | `You have no tasks!` |
+
+## TC13f: `undo` is not itself undoable
+**Aim:** C-Undo: running `undo` twice in a row must not redo the reversed command - the second `undo` must find nothing left to undo.
+
+| Input | Expected Output |
+|---|---|
+| `todo read book` | `Got it. I've added this task:` |
+| `undo` | `OK, I've undone adding this task:` |
+| `undo` | `Nothing to undo!` |

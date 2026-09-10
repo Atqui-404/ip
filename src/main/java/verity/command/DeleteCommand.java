@@ -8,8 +8,9 @@ import verity.task.TaskList;
 /**
  * Removes a task from the task list.
  */
-public class DeleteCommand extends Command {
+public class DeleteCommand extends Command implements Undoable {
     private final int index;
+    private Task removedTask;
 
     /**
      * Creates a command that removes the task at the given index.
@@ -31,8 +32,23 @@ public class DeleteCommand extends Command {
     @Override
     public String execute(TaskList tasks, Storage storage) throws VerityException {
         requireValidIndex(tasks, index);
-        Task removed = tasks.remove(index);
-        String response = "Noted. I've removed this task:\n  " + removed
+        removedTask = tasks.remove(index);
+        String response = "Noted. I've removed this task:\n  " + removedTask
+                + "\nNow you have " + tasks.size() + " tasks in the list.";
+        return response + save(tasks, storage);
+    }
+
+    /**
+     * Re-inserts the removed task at its original index, undoing this command.
+     *
+     * @param tasks {@inheritDoc}
+     * @param storage {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String undo(TaskList tasks, Storage storage) {
+        tasks.add(index, removedTask);
+        String response = "OK, I've undone removing this task:\n  " + removedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
         return response + save(tasks, storage);
     }

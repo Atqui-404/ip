@@ -3,6 +3,8 @@ package verity;
 import java.io.IOException;
 
 import verity.command.Command;
+import verity.command.UndoCommand;
+import verity.command.Undoable;
 import verity.parser.Parser;
 import verity.storage.Storage;
 import verity.task.TaskList;
@@ -17,6 +19,7 @@ public class Verity {
     private final Storage storage;
     private TaskList tasks;
     private boolean isExit = false;
+    private Undoable lastUndoableCommand;
 
     /**
      * Creates Verity, loading any previously saved tasks from the given file.
@@ -60,12 +63,29 @@ public class Verity {
      */
     public String getResponse(String input) {
         try {
-            Command command = Parser.parse(input);
+            Command command = Parser.parse(input, lastUndoableCommand);
             String response = command.execute(tasks, storage);
+            updateUndoHistory(command);
             isExit = command.isExit();
             return response;
         } catch (VerityException e) {
             return "ERROR!!! >.<\n" + e.getMessage();
+        }
+    }
+
+    /**
+     * Updates what {@code undo} would reverse next, after executing the given command: running
+     * {@code undo} itself always clears the slot (there is no redo); running an undoable command
+     * overwrites it with that command; anything else (e.g. {@code list}, {@code find}) leaves it
+     * untouched, since it didn't change the task list.
+     *
+     * @param executed Command that was just executed.
+     */
+    private void updateUndoHistory(Command executed) {
+        if (executed instanceof UndoCommand) {
+            lastUndoableCommand = null;
+        } else if (executed instanceof Undoable undoable) {
+            lastUndoableCommand = undoable;
         }
     }
 

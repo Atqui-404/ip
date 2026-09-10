@@ -44,6 +44,18 @@ public class TaskList {
     }
 
     /**
+     * Inserts a task at the given index, shifting later tasks back. Used to restore a task
+     * to its original position, e.g. when undoing its removal.
+     *
+     * @param index 0-based index to insert at.
+     * @param task Task to insert.
+     */
+    public void add(int index, Task task) {
+        assert index >= 0 && index <= tasks.size() : "insertion index out of bounds";
+        tasks.add(index, task);
+    }
+
+    /**
      * Removes and returns the task at the given index.
      *
      * @param index 0-based index of the task to remove.
