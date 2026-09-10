@@ -89,45 +89,78 @@ public class Storage {
      *                                     unrecognized task type, or an invalid done flag.
      */
     private Task parseTask(String line) throws CorruptedSaveDataException {
-        String[] fields = line.split("\\|", -1);
-        for (int i = 0; i < fields.length; i++) {
-            fields[i] = fields[i].trim();
-        }
+        String[] fields = splitFields(line);
         if (fields.length < 3) {
             throw new CorruptedSaveDataException("expected at least 3 fields, found " + fields.length);
         }
         String type = fields[0];
-        String doneFlag = fields[1];
-        if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
-            throw new CorruptedSaveDataException("done flag must be '0' or '1', found '" + doneFlag + "'");
-        }
-        boolean isDone = doneFlag.equals("1");
+        boolean isDone = parseDoneFlag(fields[1]);
         String description = fields[2];
 
-        Task task;
-        switch (type) {
-            case "T":
-                task = new Todo(description);
-                break;
-            case "D":
-                if (fields.length < 4) {
-                    throw new CorruptedSaveDataException("deadline is missing its due-date field");
-                }
-                task = new Deadline(description, parseSavedDate(fields[3]));
-                break;
-            case "E":
-                if (fields.length < 5) {
-                    throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
-                }
-                task = new Event(description, parseSavedDate(fields[3]), parseSavedDate(fields[4]));
-                break;
-            default:
-                throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
-        }
+        Task task = buildTask(type, description, fields);
         if (isDone) {
             task.markAsDone();
         }
         return task;
+    }
+
+    /**
+     * Splits a save-format line into its trimmed {@code " | "}-separated fields.
+     *
+     * @param line Save-format line to split.
+     * @return Trimmed fields, in file order.
+     */
+    private String[] splitFields(String line) {
+        String[] fields = line.split("\\|", -1);
+        for (int i = 0; i < fields.length; i++) {
+            fields[i] = fields[i].trim();
+        }
+        return fields;
+    }
+
+    /**
+     * Parses a save-format done-flag field.
+     *
+     * @param doneFlag Done-flag field, expected to be exactly {@code "0"} or {@code "1"}.
+     * @return {@code true} if the flag is {@code "1"}.
+     * @throws CorruptedSaveDataException If the flag is neither {@code "0"} nor {@code "1"}.
+     */
+    private boolean parseDoneFlag(String doneFlag) throws CorruptedSaveDataException {
+        if (!doneFlag.equals("0") && !doneFlag.equals("1")) {
+            throw new CorruptedSaveDataException("done flag must be '0' or '1', found '" + doneFlag + "'");
+        }
+        return doneFlag.equals("1");
+    }
+
+    /**
+     * Builds the task-type-specific part of a save-format line: a {@link Todo} needs no
+     * further fields, a {@link Deadline} needs a due-date field, and an {@link Event} needs
+     * start/end-date fields.
+     *
+     * @param type Task-type field ({@code "T"}, {@code "D"}, or {@code "E"}).
+     * @param description Description field, already extracted by the caller.
+     * @param fields All fields of the line, for type-specific ones beyond the description.
+     * @return Task built from the type-specific fields, not-done by default.
+     * @throws CorruptedSaveDataException If the type is unrecognized, or a type-specific
+     *                                     field is missing or invalid.
+     */
+    private Task buildTask(String type, String description, String[] fields) throws CorruptedSaveDataException {
+        switch (type) {
+            case "T":
+                return new Todo(description);
+            case "D":
+                if (fields.length < 4) {
+                    throw new CorruptedSaveDataException("deadline is missing its due-date field");
+                }
+                return new Deadline(description, parseSavedDate(fields[3]));
+            case "E":
+                if (fields.length < 5) {
+                    throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
+                }
+                return new Event(description, parseSavedDate(fields[3]), parseSavedDate(fields[4]));
+            default:
+                throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
+        }
     }
 
     /**
