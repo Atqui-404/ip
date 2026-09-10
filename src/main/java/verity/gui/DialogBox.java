@@ -34,6 +34,10 @@ public class DialogBox extends HBox {
             e.printStackTrace();
         }
 
+        // FXMLLoader.load() injects every @FXML field before returning; if it didn't throw,
+        // dialog/displayPicture are guaranteed set. A null here would mean DialogBox.fxml's
+        // fx:id attributes no longer match these field names.
+        assert dialog != null && displayPicture != null : "FXML fields must be injected after load()";
         dialog.setText(text);
         displayPicture.setImage(img);
         // Keep the pixel-art avatars crisp instead of blurred when JavaFX scales them.

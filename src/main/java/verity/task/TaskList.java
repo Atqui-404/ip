@@ -27,6 +27,9 @@ public class TaskList {
      * @param tasks Tasks to start with.
      */
     public TaskList(List<Task> tasks) {
+        // Storage.load() always returns a list (empty at worst, never null) - a null here
+        // would mean that contract was broken, not that the user did anything wrong.
+        assert tasks != null : "tasks list must not be null";
         this.tasks = new ArrayList<>(tasks);
     }
 
@@ -46,6 +49,10 @@ public class TaskList {
      * @return The removed task.
      */
     public Task remove(int index) {
+        // Every command that removes a task (e.g. DeleteCommand) calls requireValidIndex()
+        // first and only reaches here once that's passed - an invalid index at this point
+        // would mean a command forgot that check, not that the user gave a bad index.
+        assert isValidIndex(index) : "remove() must only be called with a valid index";
         return tasks.remove(index);
     }
 
@@ -56,6 +63,9 @@ public class TaskList {
      * @return Task at that index.
      */
     public Task get(int index) {
+        // Same reasoning as remove(): every caller (Mark/Unmark/Delete commands) checks
+        // requireValidIndex() before calling get(), so an invalid index here is a caller bug.
+        assert isValidIndex(index) : "get() must only be called with a valid index";
         return tasks.get(index);
     }
 

@@ -52,6 +52,10 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        // Main.start() always calls setVerity() immediately after loading the FXML, before
+        // showing the stage - the user has no way to trigger this handler before that
+        // happens, so a null verity here would mean that startup wiring was broken.
+        assert verity != null : "setVerity() must be called before the user can interact with this window";
         String input = userInput.getText();
         String response = verity.getResponse(input);
         dialogContainer.getChildren().addAll(

@@ -37,6 +37,9 @@ public class Storage {
      * @throws IOException If the directory or file could not be written to.
      */
     public void save(List<Task> tasks) throws IOException {
+        // Command.save() always passes TaskList.getTasks(), which is never null (an empty
+        // list at worst) - a null here would be a bug in that internal collaboration.
+        assert tasks != null : "tasks list must not be null";
         Path parent = filePath.getParent();
         if (parent != null) {
             Files.createDirectories(parent);
