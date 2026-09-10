@@ -1,5 +1,7 @@
 package verity.parser;
 
+import java.util.Arrays;
+
 /**
  * The set of command keywords Verity recognizes. Each constant knows its own
  * keyword and whether that keyword must match the whole input exactly (no
@@ -53,15 +55,12 @@ public enum CommandWord {
      * @return Matching command word, or {@code null} if unrecognized.
      */
     public static CommandWord match(String command) {
-        for (CommandWord candidate : values()) {
-            boolean matches = candidate.takesArguments
-                    ? command.startsWith(candidate.keyword)
-                    : command.equals(candidate.keyword);
-            if (matches) {
-                return candidate;
-            }
-        }
-        return null;
+        return Arrays.stream(values())
+                .filter(candidate -> candidate.takesArguments
+                        ? command.startsWith(candidate.keyword)
+                        : command.equals(candidate.keyword))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
