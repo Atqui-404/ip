@@ -20,6 +20,8 @@ import verity.command.FindCommand;
 import verity.command.ListCommand;
 import verity.command.MarkCommand;
 import verity.command.OnCommand;
+import verity.command.UndoCommand;
+import verity.command.Undoable;
 import verity.command.UnmarkCommand;
 import verity.storage.Storage;
 import verity.task.TaskList;
@@ -242,6 +244,31 @@ class ParserTest {
         TaskList tasks = new TaskList();
         VerityException e = assertThrows(VerityException.class, () -> markCommand.execute(tasks, newStorage()));
         assertTrue(e.getMessage().contains("no task 5"));
+    }
+
+    // ---- undo ----
+
+    @Test
+    void parse_undoNoHistory_returnsUndoCommandReportingNothingToUndo() throws VerityException, IOException {
+        Command undoCommand = Parser.parse("undo");
+        assertInstanceOf(UndoCommand.class, undoCommand);
+
+        String response = undoCommand.execute(new TaskList(), newStorage());
+
+        assertEquals("Nothing to undo!", response);
+    }
+
+    @Test
+    void parse_undoWithHistory_returnsUndoCommandThatReversesIt() throws VerityException, IOException {
+        TaskList tasks = new TaskList();
+        Command addCommand = Parser.parse("todo read book");
+        addCommand.execute(tasks, newStorage());
+
+        Command undoCommand = Parser.parse("undo", (Undoable) addCommand);
+        String response = undoCommand.execute(tasks, newStorage());
+
+        assertTrue(tasks.isEmpty());
+        assertTrue(response.contains("undone adding this task"));
     }
 
     // ---- bye ----

@@ -105,4 +105,75 @@ class CommandTest {
 
         assertEquals("You have 1 tasks!\n1.[T][ ] read book", response);
     }
+
+    @Test
+    void addCommand_undo_removesTheAddedTask() throws VerityException {
+        TaskList tasks = new TaskList();
+        AddCommand command = new AddCommand(new Todo("read book"));
+        command.execute(tasks, newStorage());
+
+        String response = command.undo(tasks, newStorage());
+
+        assertTrue(tasks.isEmpty());
+        assertTrue(response.contains("undone adding this task"));
+    }
+
+    @Test
+    void deleteCommand_undo_restoresTaskAtOriginalIndex() throws VerityException {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        tasks.add(new Todo("write essay"));
+        tasks.add(new Todo("return book"));
+        DeleteCommand command = new DeleteCommand(1);
+        command.execute(tasks, newStorage());
+
+        command.undo(tasks, newStorage());
+
+        assertEquals(3, tasks.size());
+        assertEquals("[T][ ] write essay", tasks.get(1).toString());
+    }
+
+    @Test
+    void markCommand_undo_marksTheTaskAsNotDone() throws VerityException {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        MarkCommand command = new MarkCommand(0);
+        command.execute(tasks, newStorage());
+
+        command.undo(tasks, newStorage());
+
+        assertEquals("[T][ ] read book", tasks.get(0).toString());
+    }
+
+    @Test
+    void unmarkCommand_undo_marksTheTaskAsDone() throws VerityException {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+        tasks.get(0).markAsDone();
+        UnmarkCommand command = new UnmarkCommand(0);
+        command.execute(tasks, newStorage());
+
+        command.undo(tasks, newStorage());
+
+        assertEquals("[T][X] read book", tasks.get(0).toString());
+    }
+
+    @Test
+    void undoCommand_nothingToUndo_returnsNothingToUndoMessage() {
+        String response = new UndoCommand(null).execute(new TaskList(), newStorage());
+
+        assertEquals("Nothing to undo!", response);
+    }
+
+    @Test
+    void undoCommand_givenUndoableCommand_delegatesToItsUndo() throws VerityException {
+        TaskList tasks = new TaskList();
+        AddCommand addCommand = new AddCommand(new Todo("read book"));
+        addCommand.execute(tasks, newStorage());
+
+        String response = new UndoCommand(addCommand).execute(tasks, newStorage());
+
+        assertTrue(tasks.isEmpty());
+        assertTrue(response.contains("undone adding this task"));
+    }
 }

@@ -7,7 +7,7 @@ import verity.task.TaskList;
 /**
  * Adds a task to the task list.
  */
-public class AddCommand extends Command {
+public class AddCommand extends Command implements Undoable {
     private final Task task;
 
     /**
@@ -30,6 +30,21 @@ public class AddCommand extends Command {
     public String execute(TaskList tasks, Storage storage) {
         tasks.add(task);
         String response = "Got it. I've added this task:\n  " + task
+                + "\nNow you have " + tasks.size() + " tasks in the list.";
+        return response + save(tasks, storage);
+    }
+
+    /**
+     * Removes the task this command added, undoing it.
+     *
+     * @param tasks {@inheritDoc}
+     * @param storage {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String undo(TaskList tasks, Storage storage) {
+        tasks.remove(tasks.size() - 1);
+        String response = "OK, I've undone adding this task:\n  " + task
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
         return response + save(tasks, storage);
     }

@@ -27,6 +27,8 @@ public enum CommandWord {
     UNMARK("unmark", true),
     /** Removes a task from the task list. */
     DELETE("delete", true),
+    /** Reverses the most recently executed undoable command. */
+    UNDO("undo", false),
     /** Ends the program. */
     BYE("bye", false);
 

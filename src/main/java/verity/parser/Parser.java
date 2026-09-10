@@ -12,6 +12,8 @@ import verity.command.FindCommand;
 import verity.command.ListCommand;
 import verity.command.MarkCommand;
 import verity.command.OnCommand;
+import verity.command.UndoCommand;
+import verity.command.Undoable;
 import verity.command.UnmarkCommand;
 import verity.task.Deadline;
 import verity.task.Event;
@@ -23,7 +25,8 @@ import verity.task.Todo;
 public class Parser {
 
     /**
-     * Parses a full line of user input into the {@link Command} it represents.
+     * Parses a full line of user input into the {@link Command} it represents, with nothing
+     * available to undo.
      *
      * @param fullCommand Full line of user input.
      * @return Command to execute.
@@ -34,6 +37,23 @@ public class Parser {
      *                          against the actual task list.
      */
     public static Command parse(String fullCommand) throws VerityException {
+        return parse(fullCommand, null);
+    }
+
+    /**
+     * Parses a full line of user input into the {@link Command} it represents.
+     *
+     * @param fullCommand Full line of user input.
+     * @param lastUndoableCommand Most recently executed undoable command, used if the input
+     *                            is {@code undo}; {@code null} if there is nothing to undo.
+     * @return Command to execute.
+     * @throws VerityException If the input isn't a recognized command, or its arguments are
+     *                          malformed (e.g. an empty description, a missing marker, or an
+     *                          invalid date). A task index that doesn't exist is <em>not</em>
+     *                          caught here - that's only knowable once the command executes
+     *                          against the actual task list.
+     */
+    public static Command parse(String fullCommand, Undoable lastUndoableCommand) throws VerityException {
         String command = fullCommand.toLowerCase();
         CommandWord matched = CommandWord.match(command);
         if (matched == null) {
@@ -53,6 +73,8 @@ public class Parser {
                 return new MarkCommand(parseTaskIndex(fullCommand, CommandWord.MARK));
             case DELETE:
                 return new DeleteCommand(parseTaskIndex(fullCommand, CommandWord.DELETE));
+            case UNDO:
+                return new UndoCommand(lastUndoableCommand);
             case TODO:
                 return new AddCommand(parseTodo(fullCommand));
             case DEADLINE:

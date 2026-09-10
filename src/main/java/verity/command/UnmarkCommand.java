@@ -7,7 +7,7 @@ import verity.task.TaskList;
 /**
  * Marks a task as not done.
  */
-public class UnmarkCommand extends Command {
+public class UnmarkCommand extends Command implements Undoable {
     private final int index;
 
     /**
@@ -32,6 +32,20 @@ public class UnmarkCommand extends Command {
         requireValidIndex(tasks, index);
         tasks.get(index).markAsNotDone();
         String response = "OK, I've marked this task as not done yet:\n  " + tasks.get(index);
+        return response + save(tasks, storage);
+    }
+
+    /**
+     * Marks the task at this command's index as done, undoing this command.
+     *
+     * @param tasks {@inheritDoc}
+     * @param storage {@inheritDoc}
+     * @return {@inheritDoc}
+     */
+    @Override
+    public String undo(TaskList tasks, Storage storage) {
+        tasks.get(index).markAsDone();
+        String response = "OK, I've undone marking this task as not done:\n  " + tasks.get(index);
         return response + save(tasks, storage);
     }
 }
