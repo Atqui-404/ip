@@ -2,6 +2,8 @@ package verity.command;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import verity.VerityException;
 import verity.storage.Storage;
@@ -76,13 +78,8 @@ public abstract class Command {
      * @return Numbered, newline-separated listing of the tasks.
      */
     protected String formatNumberedList(List<Task> tasks) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < tasks.size(); i++) {
-            if (i > 0) {
-                result.append("\n");
-            }
-            result.append(i + 1).append(".").append(tasks.get(i));
-        }
-        return result.toString();
+        return IntStream.range(0, tasks.size())
+                .mapToObj(i -> (i + 1) + "." + tasks.get(i))
+                .collect(Collectors.joining("\n"));
     }
 }

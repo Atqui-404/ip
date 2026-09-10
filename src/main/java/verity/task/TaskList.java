@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Holds the list of tasks the user is tracking, and the operations to
@@ -103,13 +104,9 @@ public class TaskList {
      * @return Matching tasks, in list order.
      */
     public List<Task> getTasksOnDate(LocalDate date) {
-        List<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (isOnDate(task, date)) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        return tasks.stream()
+                .filter(task -> isOnDate(task, date))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -120,13 +117,9 @@ public class TaskList {
      */
     public List<Task> findByKeyword(String keyword) {
         String lowerKeyword = keyword.toLowerCase();
-        List<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getDescription().toLowerCase().contains(lowerKeyword)) {
-                matches.add(task);
-            }
-        }
-        return matches;
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase().contains(lowerKeyword))
+                .collect(Collectors.toList());
     }
 
     /**
