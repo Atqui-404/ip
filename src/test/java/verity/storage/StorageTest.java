@@ -140,6 +140,20 @@ class StorageTest {
     }
 
     @Test
+    void load_emptyDescriptionOrReverseEvent_lineSkippedRestStillLoaded() throws IOException {
+        Path filePath = tempDir.resolve("verity.txt");
+        Files.writeString(filePath, "T | 0 |   \n"
+                + "E | 0 | conference | 2019-12-03 | 2019-12-01\n"
+                + "T | 0 | read book\n");
+        Storage storage = new Storage(filePath.toString());
+
+        List<Task> loaded = storage.load();
+
+        assertEquals(1, loaded.size());
+        assertEquals("[T][ ] read book", loaded.get(0).toString());
+    }
+
+    @Test
     void save_emptyTaskList_writesEmptyFile() throws IOException {
         Path filePath = tempDir.resolve("verity.txt");
         Storage storage = new Storage(filePath.toString());

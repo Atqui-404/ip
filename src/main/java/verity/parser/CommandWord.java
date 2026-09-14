@@ -59,10 +59,25 @@ public enum CommandWord {
     public static CommandWord match(String command) {
         return Arrays.stream(values())
                 .filter(candidate -> candidate.takesArguments
-                        ? command.startsWith(candidate.keyword)
+                        ? matchesArgumentCommand(command, candidate.keyword)
                         : command.equals(candidate.keyword))
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Returns whether the input starts with an argument-taking command as a complete word.
+     * This prevents inputs such as {@code "todays plan"} from being mistaken for a
+     * {@code todo} command.
+     *
+     * @param command Lowercased user input.
+     * @param keyword Command keyword to look for.
+     * @return {@code true} if the keyword is the whole input or is followed by whitespace.
+     */
+    private static boolean matchesArgumentCommand(String command, String keyword) {
+        return command.equals(keyword)
+                || (command.startsWith(keyword) && command.length() > keyword.length()
+                && Character.isWhitespace(command.charAt(keyword.length())));
     }
 
     /**

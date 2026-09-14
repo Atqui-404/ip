@@ -2,6 +2,7 @@ package verity.parser;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Locale;
 
 import verity.VerityException;
 import verity.command.AddCommand;
@@ -54,7 +55,12 @@ public class Parser {
      *                          against the actual task list.
      */
     public static Command parse(String fullCommand, Undoable lastUndoableCommand) throws VerityException {
-        String command = fullCommand.toLowerCase();
+        if (fullCommand == null || fullCommand.isBlank()) {
+            throw new VerityException("I didn't catch a command. Try " + CommandWord.describeAll() + ". :)");
+        }
+
+        String input = fullCommand.trim();
+        String command = input.toLowerCase(Locale.ROOT);
         CommandWord matched = CommandWord.match(command);
         if (matched == null) {
             throw new VerityException(
@@ -64,23 +70,23 @@ public class Parser {
             case LIST:
                 return new ListCommand();
             case ON:
-                return new OnCommand(parseOnDate(fullCommand));
+                return new OnCommand(parseOnDate(input));
             case FIND:
-                return new FindCommand(parseFindKeyword(fullCommand));
+                return new FindCommand(parseFindKeyword(input));
             case UNMARK:
-                return new UnmarkCommand(parseTaskIndex(fullCommand, CommandWord.UNMARK));
+                return new UnmarkCommand(parseTaskIndex(input, CommandWord.UNMARK));
             case MARK:
-                return new MarkCommand(parseTaskIndex(fullCommand, CommandWord.MARK));
+                return new MarkCommand(parseTaskIndex(input, CommandWord.MARK));
             case DELETE:
-                return new DeleteCommand(parseTaskIndex(fullCommand, CommandWord.DELETE));
+                return new DeleteCommand(parseTaskIndex(input, CommandWord.DELETE));
             case UNDO:
                 return new UndoCommand(lastUndoableCommand);
             case TODO:
-                return new AddCommand(parseTodo(fullCommand));
+                return new AddCommand(parseTodo(input));
             case DEADLINE:
-                return new AddCommand(parseDeadline(fullCommand));
+                return new AddCommand(parseDeadline(input));
             case EVENT:
-                return new AddCommand(parseEvent(fullCommand));
+                return new AddCommand(parseEvent(input));
             case BYE:
                 // Fallthrough
             default:
@@ -113,7 +119,7 @@ public class Parser {
      */
     private static Deadline parseDeadline(String input) throws VerityException {
         String rest = input.substring("deadline".length()).trim();
-        String[] parts = rest.split("(?i)/by", 2);
+        String[] parts = rest.split("(?i)(?:^|\\s+)/by\\b", 2);
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
@@ -188,7 +194,7 @@ public class Parser {
      */
     private static Event parseEvent(String input) throws VerityException {
         String rest = input.substring("event".length()).trim();
-        String[] parts = rest.split("(?i)/from", 2);
+        String[] parts = rest.split("(?i)(?:^|\\s+)/from\\b", 2);
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
@@ -198,7 +204,7 @@ public class Parser {
         if (parts.length < 2) {
             throw new VerityException("An event needs a start time! :| \nAdd `/from <when>` after the description.");
         }
-        String[] fromTo = parts[1].split("(?i)/to", 2);
+        String[] fromTo = parts[1].split("(?i)(?:^|\\s+)/to\\b", 2);
         if (fromTo.length < 2) {
             throw new VerityException("An event needs an end time. :| \nAdd `/to <when>` after the start time.");
         }
@@ -210,7 +216,12 @@ public class Parser {
         if (to.isEmpty()) {
             throw new VerityException("The end time after `/to` can't be empty! \nTell me when it ends.");
         }
-        return new Event(description, parseDate(from, "/from"), parseDate(to, "/to"));
+        LocalDate startDate = parseDate(from, "/from");
+        LocalDate endDate = parseDate(to, "/to");
+        if (endDate.isBefore(startDate)) {
+            throw new VerityException("An event can't end before it starts. Check the `/from` and `/to` dates.");
+        }
+        return new Event(description, startDate, endDate);
     }
 
     /**
@@ -238,6 +249,9 @@ public class Parser {
         } catch (NumberFormatException e) {
             throw new VerityException(
                     "'" + rest + "' isn't a valid task number.");
+        }
+        if (number <= 0) {
+            throw new VerityException("Task numbers start at 1. Try `" + keyword + " 1`.");
         }
         return number - 1;
     }

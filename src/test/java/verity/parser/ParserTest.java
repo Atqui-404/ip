@@ -54,6 +54,16 @@ class ParserTest {
         assertThrows(VerityException.class, () -> Parser.parse("todo"));
     }
 
+    @Test
+    void parse_whitespaceAroundCommand_ignoredSuccessfully() throws VerityException, IOException {
+        Command command = Parser.parse("  todo read book  ");
+        TaskList tasks = new TaskList();
+
+        command.execute(tasks, newStorage());
+
+        assertEquals("[T][ ] read book", tasks.get(0).toString());
+    }
+
     // ---- deadline ----
 
     @Test
@@ -130,6 +140,14 @@ class ParserTest {
     @Test
     void parse_eventInvalidToDate_exceptionThrown() {
         assertThrows(VerityException.class, () -> Parser.parse("event meeting /from 2019-08-06 /to whenever"));
+    }
+
+    @Test
+    void parse_eventEndingBeforeItStarts_exceptionExplainsDateOrder() {
+        VerityException exception = assertThrows(VerityException.class, () ->
+                Parser.parse("event meeting /from 2019-08-07 /to 2019-08-06"));
+
+        assertTrue(exception.getMessage().contains("end before it starts"));
     }
 
     // ---- list ----
@@ -236,6 +254,13 @@ class ParserTest {
     }
 
     @Test
+    void parse_markZero_exceptionExplainsTaskNumbersStartAtOne() {
+        VerityException exception = assertThrows(VerityException.class, () -> Parser.parse("mark 0"));
+
+        assertTrue(exception.getMessage().contains("start at 1"));
+    }
+
+    @Test
     void parse_markIndexOutOfRange_exceptionThrownOnlyAtExecuteTime() throws VerityException {
         // Parsing succeeds - "5" is a well-formed number. Only execute(), which has access
         // to the actual task list, can know it doesn't refer to an existing task.
@@ -288,6 +313,15 @@ class ParserTest {
         VerityException e = assertThrows(VerityException.class, () -> Parser.parse("gibberish"));
 
         assertTrue(e.getMessage().contains("invalid command"));
+    }
+
+    @Test
+    void parse_blankOrNullInput_helpfulExceptionThrown() {
+        VerityException blankException = assertThrows(VerityException.class, () -> Parser.parse("  \t  "));
+        VerityException nullException = assertThrows(VerityException.class, () -> Parser.parse(null));
+
+        assertTrue(blankException.getMessage().contains("didn't catch a command"));
+        assertTrue(nullException.getMessage().contains("didn't catch a command"));
     }
 
     private static Command assertDoesNotThrowParse(String input) {
