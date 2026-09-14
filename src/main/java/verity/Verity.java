@@ -1,6 +1,8 @@
 package verity;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import verity.command.Command;
 import verity.command.UndoCommand;
@@ -15,11 +17,15 @@ import verity.ui.Ui;
  * {@link TaskList}, and drives the read-parse-execute loop.
  */
 public class Verity {
+    /** Prefix applied to replies caused by invalid input or an unavailable operation. */
+    public static final String ERROR_PREFIX = "ERROR!!! >.<\n";
+
     private final Ui ui;
     private final Storage storage;
+    /** Completed reversible actions, with the most recent action at the top. */
+    private final Deque<Undoable> undoHistory = new ArrayDeque<>();
     private TaskList tasks;
     private boolean isExit = false;
-    private Undoable lastUndoableCommand;
 
     /**
      * Creates Verity, loading any previously saved tasks from the given file.
@@ -63,29 +69,41 @@ public class Verity {
      */
     public String getResponse(String input) {
         try {
-            Command command = Parser.parse(input, lastUndoableCommand);
+            Command command = Parser.parse(input, undoHistory.peek());
             String response = command.execute(tasks, storage);
             updateUndoHistory(command);
             isExit = command.isExit();
             return response;
         } catch (VerityException e) {
-            return "ERROR!!! >.<\n" + e.getMessage();
+            return ERROR_PREFIX + e.getMessage();
         }
     }
 
     /**
-     * Updates what {@code undo} would reverse next, after executing the given command: running
-     * {@code undo} itself always clears the slot (there is no redo); running an undoable command
-     * overwrites it with that command; anything else (e.g. {@code list}, {@code find}) leaves it
-     * untouched, since it didn't change the task list.
+     * Returns whether a response represents a recoverable user-facing error.
+     * The GUI uses this to make errors visually distinct from ordinary replies.
+     *
+     * @param response Response returned by {@link #getResponse(String)}.
+     * @return {@code true} if the response starts with {@link #ERROR_PREFIX}.
+     */
+    public static boolean isErrorResponse(String response) {
+        return response != null && response.startsWith(ERROR_PREFIX);
+    }
+
+    /**
+     * Updates the session's undo stack after executing the given command. An {@code undo} removes
+     * the action it just reversed; an undoable command is pushed; a non-mutating command (such as
+     * {@code list} or {@code find}) leaves the stack unchanged. There is deliberately no redo.
      *
      * @param executed Command that was just executed.
      */
     private void updateUndoHistory(Command executed) {
         if (executed instanceof UndoCommand) {
-            lastUndoableCommand = null;
+            if (!undoHistory.isEmpty()) {
+                undoHistory.pop();
+            }
         } else if (executed instanceof Undoable undoable) {
-            lastUndoableCommand = undoable;
+            undoHistory.push(undoable);
         }
     }
 
