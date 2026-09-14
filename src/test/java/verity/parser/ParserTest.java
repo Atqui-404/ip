@@ -110,6 +110,25 @@ class ParserTest {
         assertEquals("[D][ ] return book (by: Oct 15 2019)", tasks.get(0).toString());
     }
 
+    @Test
+    void parse_deadlineDuplicateByMarker_exceptionExplainsDuplicateMarker() {
+        String input = "deadline return book /by 2019-01-01 /by 2020-01-01";
+
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(input));
+
+        assertTrue(e.getMessage().contains("more than once"));
+    }
+
+    @Test
+    void parse_deadlineNonExistentCalendarDate_exceptionThrown() {
+        // Well-formed yyyy-MM-dd syntax, but February never has a 30th day.
+        String input = "deadline return book /by 2019-02-30";
+
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(input));
+
+        assertTrue(e.getMessage().contains("yyyy-MM-dd"));
+    }
+
     // ---- event ----
 
     @Test
@@ -148,6 +167,42 @@ class ParserTest {
                 Parser.parse("event meeting /from 2019-08-07 /to 2019-08-06"));
 
         assertTrue(exception.getMessage().contains("end before it starts"));
+    }
+
+    @Test
+    void parse_eventSameDayStartAndEnd_isValid() throws VerityException, IOException {
+        // A single-day event is legitimate - only a start strictly after the end is rejected.
+        Command command = Parser.parse("event conference /from 2019-08-06 /to 2019-08-06");
+
+        TaskList tasks = new TaskList();
+        command.execute(tasks, newStorage());
+
+        assertEquals("[E][ ] conference (from: Aug 06 2019 to: Aug 06 2019)", tasks.get(0).toString());
+    }
+
+    @Test
+    void parse_eventToMarkerBeforeFromMarker_exceptionExplainsMarkerOrder() {
+        String input = "event meeting /to 2019-08-07 /from 2019-08-06";
+
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(input));
+
+        assertTrue(e.getMessage().contains("must come before"));
+    }
+
+    @Test
+    void parse_eventDuplicateFromMarker_exceptionExplainsDuplicateMarker() {
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(
+                "event meeting /from 2019-08-06 /from 2019-08-07 /to 2019-08-08"));
+
+        assertTrue(e.getMessage().contains("more than once"));
+    }
+
+    @Test
+    void parse_eventDuplicateToMarker_exceptionExplainsDuplicateMarker() {
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(
+                "event meeting /from 2019-08-06 /to 2019-08-07 /to 2019-08-08"));
+
+        assertTrue(e.getMessage().contains("more than once"));
     }
 
     // ---- list ----

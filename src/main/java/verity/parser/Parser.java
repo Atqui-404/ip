@@ -24,6 +24,9 @@ import verity.task.Todo;
  * Turns a full line of user input into the {@link Command} it represents.
  */
 public class Parser {
+    private static final String BY_MARKER = "(?i)(?:^|\\s+)/by\\b";
+    private static final String FROM_MARKER = "(?i)(?:^|\\s+)/from\\b";
+    private static final String TO_MARKER = "(?i)(?:^|\\s+)/to\\b";
 
     /**
      * Parses a full line of user input into the {@link Command} it represents, with nothing
@@ -119,7 +122,7 @@ public class Parser {
      */
     private static Deadline parseDeadline(String input) throws VerityException {
         String rest = input.substring("deadline".length()).trim();
-        String[] parts = rest.split("(?i)(?:^|\\s+)/by\\b", 2);
+        String[] parts = rest.split(BY_MARKER, 2);
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
@@ -133,7 +136,24 @@ public class Parser {
         if (by.isEmpty()) {
             throw new VerityException("The due time after `/by` can't be empty. Tell me when it's due.");
         }
+        if (hasMarker(by, BY_MARKER)) {
+            throw new VerityException(
+                    "You've given `/by` more than once. Use it just once, e.g. `deadline <what to do> /by <when>`.");
+        }
         return new Deadline(description, parseDate(by, "/by"));
+    }
+
+    /**
+     * Returns whether the given text still contains the given marker as a separate word,
+     * i.e. preceded by whitespace or the start of the text and followed by a word boundary.
+     * Used to detect a marker (e.g. {@code /by}) being given more than once.
+     *
+     * @param text Text to check.
+     * @param markerPattern Marker's word-boundary regex, e.g. {@link #BY_MARKER}.
+     * @return {@code true} if the marker appears in the text.
+     */
+    private static boolean hasMarker(String text, String markerPattern) {
+        return text.split(markerPattern, 2).length > 1;
     }
 
     /**
@@ -194,17 +214,21 @@ public class Parser {
      */
     private static Event parseEvent(String input) throws VerityException {
         String rest = input.substring("event".length()).trim();
-        String[] parts = rest.split("(?i)(?:^|\\s+)/from\\b", 2);
+        String[] parts = rest.split(FROM_MARKER, 2);
         String description = parts[0].trim();
         if (description.isEmpty()) {
             throw new VerityException(
                     "The description of an event can't be empty... :( \n"
                             + "Try `event <what's happening> /from <start> /to <end>`.");
         }
+        if (hasMarker(description, TO_MARKER)) {
+            throw new VerityException(
+                    "`/from` must come before `/to`. Try `event <what's happening> /from <start> /to <end>`.");
+        }
         if (parts.length < 2) {
             throw new VerityException("An event needs a start time! :| \nAdd `/from <when>` after the description.");
         }
-        String[] fromTo = parts[1].split("(?i)(?:^|\\s+)/to\\b", 2);
+        String[] fromTo = parts[1].split(TO_MARKER, 2);
         if (fromTo.length < 2) {
             throw new VerityException("An event needs an end time. :| \nAdd `/to <when>` after the start time.");
         }
@@ -212,9 +236,15 @@ public class Parser {
         if (from.isEmpty()) {
             throw new VerityException("The start time after `/from` can't be empty! \nTell me when it begins.");
         }
+        if (hasMarker(from, FROM_MARKER)) {
+            throw new VerityException("You've given `/from` more than once. Use it just once.");
+        }
         String to = fromTo[1].trim();
         if (to.isEmpty()) {
             throw new VerityException("The end time after `/to` can't be empty! \nTell me when it ends.");
+        }
+        if (hasMarker(to, FROM_MARKER) || hasMarker(to, TO_MARKER)) {
+            throw new VerityException("You've given `/from` or `/to` more than once. Each should appear just once.");
         }
         LocalDate startDate = parseDate(from, "/from");
         LocalDate endDate = parseDate(to, "/to");
