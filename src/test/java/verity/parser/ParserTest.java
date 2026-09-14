@@ -280,7 +280,7 @@ class ParserTest {
 
         String response = undoCommand.execute(new TaskList(), newStorage());
 
-        assertEquals("Nothing to undo!", response);
+        assertEquals("There's nothing to undo, genius.", response);
     }
 
     @Test
@@ -293,7 +293,7 @@ class ParserTest {
         String response = undoCommand.execute(tasks, newStorage());
 
         assertTrue(tasks.isEmpty());
-        assertTrue(response.contains("undone adding this task"));
+        assertTrue(response.contains("Whatever. Un-did it"));
     }
 
     // ---- bye ----

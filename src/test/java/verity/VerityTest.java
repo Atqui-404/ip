@@ -21,8 +21,8 @@ class VerityTest {
         verity.getResponse("todo read book");
         String response = verity.getResponse("undo");
 
-        assertTrue(response.contains("undone adding this task"));
-        assertTrue(verity.getResponse("list").contains("no tasks"));
+        assertTrue(response.contains("Whatever. Un-did it"));
+        assertTrue(verity.getResponse("list").contains("zero tasks"));
     }
 
     @Test
@@ -37,11 +37,11 @@ class VerityTest {
         String undoFirstTodo = verity.getResponse("undo");
         String noMoreActions = verity.getResponse("undo");
 
-        assertTrue(undoMark.contains("undone marking"));
+        assertTrue(undoMark.contains("Whatever. Un-did it"));
         assertTrue(undoSecondTodo.contains("write essay"));
         assertTrue(undoFirstTodo.contains("read book"));
-        assertTrue(verity.getResponse("list").contains("no tasks"));
-        assertTrue(noMoreActions.contains("Nothing to undo"));
+        assertTrue(verity.getResponse("list").contains("zero tasks"));
+        assertTrue(noMoreActions.contains("nothing to undo"));
     }
 
     @Test
@@ -52,8 +52,8 @@ class VerityTest {
 
         String response = verity.getResponse("undo");
 
-        assertTrue(response.contains("undone adding"));
-        assertTrue(verity.getResponse("list").contains("no tasks"));
+        assertTrue(response.contains("Whatever. Un-did it"));
+        assertTrue(verity.getResponse("list").contains("zero tasks"));
     }
 
     @Test

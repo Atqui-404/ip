@@ -8,7 +8,8 @@ import java.util.Scanner;
  */
 public class Ui {
     /** Greeting shown to the user before any input, on both the CLI and the GUI. */
-    public static final String GREETING = "Hello! I'm Verity\nAsk me anything! I know everything!";
+    public static final String GREETING = "Hi I'm Verity, your personal assistant.\n"
+            + "Ask me anything, I know everything!";
 
     private static final String DIVIDER = "____________________________________________________________";
 

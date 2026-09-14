@@ -29,7 +29,7 @@ public class AddCommand extends Command implements Undoable {
     @Override
     public String execute(TaskList tasks, Storage storage) {
         tasks.add(task);
-        String response = "Got it. I've added this task:\n  " + task
+        String response = "Obviously. Added:\n  " + task
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
         return response + save(tasks, storage);
     }
@@ -44,7 +44,7 @@ public class AddCommand extends Command implements Undoable {
     @Override
     public String undo(TaskList tasks, Storage storage) {
         tasks.remove(tasks.size() - 1);
-        String response = "OK, I've undone adding this task:\n  " + task
+        String response = "Whatever. Un-did it:\n  " + task
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
         return response + save(tasks, storage);
     }

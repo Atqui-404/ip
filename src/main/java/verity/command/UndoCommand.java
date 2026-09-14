@@ -29,7 +29,7 @@ public class UndoCommand extends Command {
     @Override
     public String execute(TaskList tasks, Storage storage) {
         if (lastUndoableCommand == null) {
-            return "Nothing to undo!";
+            return "There's nothing to undo, genius.";
         }
         return lastUndoableCommand.undo(tasks, storage);
     }

@@ -31,7 +31,7 @@ public class MarkCommand extends Command implements Undoable {
     public String execute(TaskList tasks, Storage storage) throws VerityException {
         requireValidIndex(tasks, index);
         tasks.get(index).markAsDone();
-        String response = "Nice! I've marked this task as done:\n  " + tasks.get(index);
+        String response = "About time. Marked as done:\n  " + tasks.get(index);
         return response + save(tasks, storage);
     }
 
@@ -45,7 +45,7 @@ public class MarkCommand extends Command implements Undoable {
     @Override
     public String undo(TaskList tasks, Storage storage) {
         tasks.get(index).markAsNotDone();
-        String response = "OK, I've undone marking this task as done:\n  " + tasks.get(index);
+        String response = "Whatever. Un-did it:\n  " + tasks.get(index);
         return response + save(tasks, storage);
     }
 }

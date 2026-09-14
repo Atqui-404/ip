@@ -33,7 +33,7 @@ public class DeleteCommand extends Command implements Undoable {
     public String execute(TaskList tasks, Storage storage) throws VerityException {
         requireValidIndex(tasks, index);
         removedTask = tasks.remove(index);
-        String response = "Noted. I've removed this task:\n  " + removedTask
+        String response = "Gone. As requested:\n  " + removedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
         return response + save(tasks, storage);
     }
@@ -48,7 +48,7 @@ public class DeleteCommand extends Command implements Undoable {
     @Override
     public String undo(TaskList tasks, Storage storage) {
         tasks.add(index, removedTask);
-        String response = "OK, I've undone removing this task:\n  " + removedTask
+        String response = "Whatever. Un-did it:\n  " + removedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.";
         return response + save(tasks, storage);
     }

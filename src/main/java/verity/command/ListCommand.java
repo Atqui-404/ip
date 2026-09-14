@@ -18,8 +18,9 @@ public class ListCommand extends Command {
     @Override
     public String execute(TaskList tasks, Storage storage) {
         if (tasks.isEmpty()) {
-            return "You have no tasks!";
+            return "Nothing. You have zero tasks - impressive, in a bad way.";
         }
-        return "You have " + tasks.size() + " tasks!\n" + formatNumberedList(tasks.getTasks());
+        return "Here's all " + tasks.size() + " tasks, since you clearly forgot:\n"
+                + formatNumberedList(tasks.getTasks());
     }
 }

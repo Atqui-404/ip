@@ -34,8 +34,8 @@ public class OnCommand extends Command {
         List<Task> matches = tasks.getTasksOnDate(date);
         String formattedDate = date.format(Task.DATE_DISPLAY_FORMAT);
         if (matches.isEmpty()) {
-            return "You have no tasks on " + formattedDate + "!";
+            return "Nothing on " + formattedDate + ". Shocking, I know.";
         }
-        return "You have " + matches.size() + " tasks on " + formattedDate + "!\n" + formatNumberedList(matches);
+        return "Here's what's happening on " + formattedDate + ":\n" + formatNumberedList(matches);
     }
 }

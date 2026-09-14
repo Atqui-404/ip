@@ -26,6 +26,8 @@ public class Verity {
     private final Deque<Undoable> undoHistory = new ArrayDeque<>();
     private TaskList tasks;
     private boolean isExit = false;
+    /** Mistakes in a row, without a successful command in between; resets to 0 on success. */
+    private int consecutiveErrorCount = 0;
 
     /**
      * Creates Verity, loading any previously saved tasks from the given file.
@@ -73,9 +75,29 @@ public class Verity {
             String response = command.execute(tasks, storage);
             updateUndoHistory(command);
             isExit = command.isExit();
+            consecutiveErrorCount = 0;
             return response;
         } catch (VerityException e) {
-            return ERROR_PREFIX + e.getMessage();
+            consecutiveErrorCount++;
+            return ERROR_PREFIX + e.getMessage() + annoyanceFor(consecutiveErrorCount);
+        }
+    }
+
+    /**
+     * Returns an escalating reaction to append after a mistake, based on how many mistakes in a
+     * row have happened (with no successful command in between): none for the first, mildly
+     * annoyed for the second, openly exasperated from the third onward.
+     *
+     * @param errorCount Number of consecutive mistakes, including the one just made.
+     * @return Reaction to append to the error message, or an empty string for the first mistake.
+     */
+    private static String annoyanceFor(int errorCount) {
+        if (errorCount <= 1) {
+            return "";
+        } else if (errorCount == 2) {
+            return "\nAgain? Read what I just told you.";
+        } else {
+            return "\nI am NOT explaining this again. >:(";
         }
     }
 

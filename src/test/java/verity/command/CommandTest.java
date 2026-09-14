@@ -93,7 +93,7 @@ class CommandTest {
     void listCommand_emptyList_noTasksMessage() {
         String response = new ListCommand().execute(new TaskList(), null);
 
-        assertEquals("You have no tasks!", response);
+        assertEquals("Nothing. You have zero tasks - impressive, in a bad way.", response);
     }
 
     @Test
@@ -103,7 +103,7 @@ class CommandTest {
 
         String response = new ListCommand().execute(tasks, null);
 
-        assertEquals("You have 1 tasks!\n1.[T][ ] read book", response);
+        assertEquals("Here's all 1 tasks, since you clearly forgot:\n1.[T][ ] read book", response);
     }
 
     @Test
@@ -115,7 +115,7 @@ class CommandTest {
         String response = command.undo(tasks, newStorage());
 
         assertTrue(tasks.isEmpty());
-        assertTrue(response.contains("undone adding this task"));
+        assertTrue(response.contains("Whatever. Un-did it"));
     }
 
     @Test
@@ -162,7 +162,7 @@ class CommandTest {
     void undoCommand_nothingToUndo_returnsNothingToUndoMessage() {
         String response = new UndoCommand(null).execute(new TaskList(), newStorage());
 
-        assertEquals("Nothing to undo!", response);
+        assertEquals("There's nothing to undo, genius.", response);
     }
 
     @Test
@@ -174,6 +174,6 @@ class CommandTest {
         String response = new UndoCommand(addCommand).execute(tasks, newStorage());
 
         assertTrue(tasks.isEmpty());
-        assertTrue(response.contains("undone adding this task"));
+        assertTrue(response.contains("Whatever. Un-did it"));
     }
 }

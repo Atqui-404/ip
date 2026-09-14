@@ -32,8 +32,8 @@ public class FindCommand extends Command {
     public String execute(TaskList tasks, Storage storage) {
         List<Task> matches = tasks.findByKeyword(keyword);
         if (matches.isEmpty()) {
-            return "No matching tasks found!";
+            return "Nothing matches. Try spelling it right.";
         }
-        return "Here are the matching tasks in your list:\n" + formatNumberedList(matches);
+        return "Found these - you're welcome:\n" + formatNumberedList(matches);
     }
 }
