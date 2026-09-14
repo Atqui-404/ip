@@ -99,6 +99,9 @@ public class Storage {
         String type = fields[0];
         boolean isDone = parseDoneFlag(fields[1]);
         String description = fields[2];
+        if (description.isBlank()) {
+            throw new CorruptedSaveDataException("task description cannot be empty");
+        }
 
         Task task = buildTask(type, description, fields);
         if (isDone) {
@@ -160,7 +163,12 @@ public class Storage {
                 if (fields.length < 5) {
                     throw new CorruptedSaveDataException("event is missing its start/end-time field(s)");
                 }
-                return new Event(description, parseSavedDate(fields[3]), parseSavedDate(fields[4]));
+                LocalDate startDate = parseSavedDate(fields[3]);
+                LocalDate endDate = parseSavedDate(fields[4]);
+                if (endDate.isBefore(startDate)) {
+                    throw new CorruptedSaveDataException("event ends before it starts");
+                }
+                return new Event(description, startDate, endDate);
             default:
                 throw new CorruptedSaveDataException("unrecognized task type '" + type + "'");
         }

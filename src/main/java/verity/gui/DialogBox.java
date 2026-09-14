@@ -39,6 +39,9 @@ public class DialogBox extends HBox {
         // fx:id attributes no longer match these field names.
         assert dialog != null && displayPicture != null : "FXML fields must be injected after load()";
         dialog.setText(text);
+        dialog.getStyleClass().add("user-label");
+        dialog.setMinWidth(0);
+        dialog.maxWidthProperty().bind(widthProperty().subtract(70));
         displayPicture.setImage(img);
         // Keep the pixel-art avatars crisp instead of blurred when JavaFX scales them.
         displayPicture.setSmooth(false);
@@ -76,6 +79,20 @@ public class DialogBox extends HBox {
     public static DialogBox getVerityDialog(String text, Image img) {
         var db = new DialogBox(text, img);
         db.flip();
+        return db;
+    }
+
+    /**
+     * Creates a left-aligned Verity dialog with the error treatment applied.
+     *
+     * @param text Error message to show.
+     * @param img Verity's avatar.
+     * @return A highlighted error dialog.
+     */
+    public static DialogBox getErrorDialog(String text, Image img) {
+        var db = getVerityDialog(text, img);
+        db.dialog.getStyleClass().remove("reply-label");
+        db.dialog.getStyleClass().add("error-label");
         return db;
     }
 }

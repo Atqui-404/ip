@@ -11,6 +11,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import verity.Verity;
+import verity.ui.Ui;
 
 /**
  * Controller for the main GUI.
@@ -26,6 +27,8 @@ public class MainWindow extends AnchorPane {
     private Button sendButton;
 
     private Verity verity;
+    private boolean isClosing;
+    private boolean greetingShown;
 
     private Image userImage = new Image(this.getClass().getResourceAsStream("/images/User.png"));
     private Image verityImage = new Image(this.getClass().getResourceAsStream("/images/Verity.png"));
@@ -36,12 +39,17 @@ public class MainWindow extends AnchorPane {
     }
 
     /**
-     * Injects the Verity instance this window talks to.
+     * Injects the Verity instance this window talks to, and shows the opening greeting so
+     * the window doesn't start blank.
      *
      * @param v Verity instance to use.
      */
     public void setVerity(Verity v) {
         verity = v;
+        if (!greetingShown) {
+            dialogContainer.getChildren().add(DialogBox.getVerityDialog(Ui.GREETING, verityImage));
+            greetingShown = true;
+        }
     }
 
     /**
@@ -52,19 +60,30 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
-        // Main.start() always calls setVerity() immediately after loading the FXML, before
-        // showing the stage - the user has no way to trigger this handler before that
-        // happens, so a null verity here would mean that startup wiring was broken.
-        assert verity != null : "setVerity() must be called before the user can interact with this window";
+        if (verity == null) {
+            dialogContainer.getChildren().add(DialogBox.getErrorDialog(
+                    "Verity is still getting ready. Please try again in a moment.", verityImage));
+            return;
+        }
+        if (isClosing) {
+            return;
+        }
+
         String input = userInput.getText();
         String response = verity.getResponse(input);
-        dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getVerityDialog(response, verityImage)
-        );
+        if (!input.isBlank()) {
+            dialogContainer.getChildren().add(DialogBox.getUserDialog(input, userImage));
+        }
+        DialogBox responseDialog = Verity.isErrorResponse(response)
+                ? DialogBox.getErrorDialog(response, verityImage)
+                : DialogBox.getVerityDialog(response, verityImage);
+        dialogContainer.getChildren().add(responseDialog);
         userInput.clear();
 
         if (verity.isExit()) {
+            isClosing = true;
+            userInput.setDisable(true);
+            sendButton.setDisable(true);
             PauseTransition delay = new PauseTransition(Duration.seconds(1));
             delay.setOnFinished(event -> Platform.exit());
             delay.play();

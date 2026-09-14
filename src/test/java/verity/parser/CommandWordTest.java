@@ -26,6 +26,12 @@ class CommandWordTest {
     }
 
     @Test
+    void match_argumentTakingCommandWithoutWordBoundary_notMatched() {
+        assertNull(CommandWord.match("todos are useful"));
+        assertNull(CommandWord.match("deadlineish"));
+    }
+
+    @Test
     void match_unrecognizedInput_nullReturned() {
         assertNull(CommandWord.match("gibberish"));
     }

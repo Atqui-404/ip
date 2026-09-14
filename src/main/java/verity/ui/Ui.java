@@ -7,6 +7,9 @@ import java.util.Scanner;
  * and reading command input.
  */
 public class Ui {
+    /** Greeting shown to the user before any input, on both the CLI and the GUI. */
+    public static final String GREETING = "Hello! I'm Verity\nAsk me anything! I know everything!";
+
     private static final String DIVIDER = "____________________________________________________________";
 
     private static final String BANNER = "__     __            _  _          \n"
@@ -24,8 +27,7 @@ public class Ui {
     public void showWelcome() {
         System.out.println(DIVIDER);
         System.out.println(BANNER);
-        System.out.println("Hello! I'm Verity");
-        System.out.println("Ask me anything! I know everything!");
+        System.out.println(GREETING);
         System.out.println(DIVIDER);
     }
 

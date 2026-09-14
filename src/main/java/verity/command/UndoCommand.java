@@ -4,15 +4,15 @@ import verity.storage.Storage;
 import verity.task.TaskList;
 
 /**
- * Reverses the most recently executed undoable command (add/delete/mark/unmark), if any.
+ * Reverses the undoable command at the top of the session's history, if any.
  */
 public class UndoCommand extends Command {
     private final Undoable lastUndoableCommand;
 
     /**
-     * Creates a command that reverses the given command.
+     * Creates a command that reverses the action currently at the top of the undo history.
      *
-     * @param lastUndoableCommand Most recently executed undoable command, or {@code null}
+     * @param lastUndoableCommand Top undoable command in the current session, or {@code null}
      *                            if there is nothing to undo.
      */
     public UndoCommand(Undoable lastUndoableCommand) {
