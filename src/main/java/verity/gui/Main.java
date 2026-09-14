@@ -26,8 +26,9 @@ public class Main extends Application {
             Scene scene = new Scene(ap);
             stage.setScene(scene);
             stage.setTitle("Verity");
-            stage.setMinHeight(220);
-            stage.setMinWidth(417);
+            stage.setMinHeight(320);
+            stage.setMinWidth(450);
+            stage.setResizable(true);
             fxmlLoader.<MainWindow>getController().setVerity(verity);
             stage.show();
         } catch (IOException e) {
