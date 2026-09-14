@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -175,5 +176,32 @@ class CommandTest {
 
         assertTrue(tasks.isEmpty());
         assertTrue(response.contains("Whatever. Un-did it"));
+    }
+
+    @Test
+    void findCommand_noMatches_returnsNothingMatchesMessage() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+
+        String response = new FindCommand("essay").execute(tasks, null);
+
+        assertEquals("Nothing matches. Try spelling it right.", response);
+    }
+
+    @Test
+    void onCommand_noMatches_returnsNothingOnDateMessage() {
+        TaskList tasks = new TaskList();
+        LocalDate date = LocalDate.of(2020, 1, 1);
+
+        String response = new OnCommand(date).execute(tasks, null);
+
+        assertEquals("Nothing on Jan 01 2020. Shocking, I know.", response);
+    }
+
+    @Test
+    void exitCommand_execute_returnsFarewellMessage() {
+        String response = new ExitCommand().execute(new TaskList(), null);
+
+        assertEquals("Finally. Try not to forget anything important. Bye! ;)", response);
     }
 }

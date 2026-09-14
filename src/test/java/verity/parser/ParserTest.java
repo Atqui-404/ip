@@ -205,6 +205,32 @@ class ParserTest {
         assertTrue(e.getMessage().contains("more than once"));
     }
 
+    @Test
+    void parse_eventFromMarkerRepeatedAfterToMarker_exceptionExplainsDuplicateMarker() {
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(
+                "event meeting /from 2019-08-06 /to 2019-08-07 /from 2019-08-08"));
+
+        assertTrue(e.getMessage().contains("more than once"));
+    }
+
+    @Test
+    void parse_eventEmptyStartTime_exceptionThrown() {
+        String input = "event meeting /from /to 2019-08-07";
+
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(input));
+
+        assertTrue(e.getMessage().contains("start time"));
+    }
+
+    @Test
+    void parse_eventEmptyEndTime_exceptionThrown() {
+        String input = "event meeting /from 2019-08-06 /to";
+
+        VerityException e = assertThrows(VerityException.class, () -> Parser.parse(input));
+
+        assertTrue(e.getMessage().contains("end time"));
+    }
+
     // ---- list ----
 
     @Test
